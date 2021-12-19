@@ -1,0 +1,72 @@
+﻿<Window x:Class="CalcApp.SpreadSheet"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CalcApp"
+        mc:Ignorable="d"
+        Title="SpreadSheet" Name="SpreadSheetWindw" Height="450" Width="620" Closing="Window_Closing" LayoutUpdated="SpreadSheetWindw_LayoutUpdated">
+    <DockPanel>
+        <StatusBar DockPanel.Dock="Top" >
+            <TextBlock Text="タイトル" Width="60" />
+            <ComboBox Name="CbAddressTitle" Width="410" IsEditable="True" MouseDoubleClick="addressTitle_MouseDoubleClick" SelectionChanged="CbAddressTitle_SelectionChanged" />
+            <ComboBox Name="CbEncode" Width="60" />
+            <StatusBarItem HorizontalAlignment="Right">
+                <Button x:Name="executeBtn" Content="読込" Width="50" Click="executeBtn_Click" >
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Name="referenceFileMenu" Header="参照を開く" Click="BtEncordTypeMenu_Click" />
+                            <MenuItem Name="downloadFileMenu" Header="ダウンロードしたファイルで開く" Click="BtEncordTypeMenu_Click" />
+                            <MenuItem Name="clearFileMenu" Header="入力クリア" Click="BtEncordTypeMenu_Click" />
+                            <MenuItem Name="registFileMenu" Header="登録" Click="BtEncordTypeMenu_Click" />
+                            <MenuItem Name="removeFileMenu" Header="削除" Click="BtEncordTypeMenu_Click" />
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                </Button>
+            </StatusBarItem>
+        </StatusBar>
+        <StatusBar DockPanel.Dock="Top" >
+            <TextBlock Text="コメント" Width="60" />
+            <TextBox x:Name="TbComment" Width="250" />
+            <TextBlock Text="参照" Width="30" />
+            <TextBox x:Name="TbReference" Width="230" MouseDoubleClick="TbReference_MouseDoubleClick" />
+        </StatusBar>
+        <StatusBar DockPanel.Dock="Top" >
+            <TextBlock Text="パス/アドレス" Width="60" />
+            <TextBox x:Name="TbAddress" Width="440" MouseDoubleClick="TbAddress_MouseDoubleClick" />
+            <CheckBox x:Name="CbTsv" Content="TSVファイル" />
+        </StatusBar>
+        <StatusBar DockPanel.Dock="Bottom" >
+            <TextBlock Text="表情報" />
+            <TextBlock Name="TbRowInfo" />
+            <TextBlock Name="TbColInfo" />
+            <StatusBarItem HorizontalAlignment="Right">
+                <Button x:Name="helpBtn" Width="25" Height="22" Click="helpBtn_Click" >
+                    <Path Data="M6,7 A 4.5,4 0 1 0 1,4 M6,7 6,11 M6,12 6,15" Stroke="Blue" StrokeThickness="3" />
+                </Button>
+            </StatusBarItem>
+        </StatusBar>
+        <StackPanel DockPanel.Dock="Left" >
+            <TextBlock Text="集計系列(縦軸)" />
+            <ComboBox Name="CbComboYList" Width="100" />
+            <TextBlock Text="集計項目(横軸)" />
+            <ComboBox Name="CbComboXList" Width="100" />
+            <TextBlock Text="集計データ値項目" />
+            <ComboBox Name="CbComboDataList" Width="100" />
+            <TextBlock Text="操作" />
+            <ComboBox Name="CbOperation" SelectionChanged="CbOperation_SelectionChanged" />
+            <Button Content="1つ前に戻す" Name="BtConvert" Click="Button_Click" />
+            <Button Content="グラフ化" Name="BtGraph" Click="BtGraph_Click" />
+            <Button Content="CSV出力" Name="BtCsvOut" Click="BtCsvOut_Click" />
+        </StackPanel>
+        <DataGrid x:Name="DgDataSheet" IsReadOnly="True" Sorting="DataSheet_Sorting" >
+            <DataGrid.ContextMenu >
+                <ContextMenu>
+                    <MenuItem x:Name="SelectCopyMenu" Header="コピー" Click="DataGridMenuClick" />
+                    <MenuItem x:Name="SelectDeleteMenu" Header="選択行削除" Click="DataGridMenuClick" />
+                    <MenuItem x:Name="NotSelectDeleteMenu" Header="選択行以外削除" Click="DataGridMenuClick" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+        </DataGrid>
+    </DockPanel>
+</Window>

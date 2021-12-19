@@ -1,0 +1,46 @@
+﻿<Window x:Class="CalcApp.TableGraph"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CalcApp"
+        mc:Ignorable="d"
+        Title="TableGraph" Height="450" Width="600" LayoutUpdated="Window_LayoutUpdated" Closing="Window_Closing" Loaded="Window_Loaded">
+    <DockPanel >
+        <StackPanel DockPanel.Dock="Left" Width="100" >
+            <TextBlock Text="グラフの種類" />
+            <ComboBox Name="CbGrphType" SelectionChanged="CbGrphType_SelectionChanged" />
+            <TextBlock Text="開始位置" />
+            <ComboBox Name="CbStartPos" SelectionChanged="CbStartPos_SelectionChanged" />
+            <TextBlock Text="終了位置" />
+            <ComboBox Name="CbEndPos" SelectionChanged="CbEndPos_SelectionChanged" />
+            <TextBlock Text="操作" />
+            <ComboBox Name="CbOperation" SelectionChanged="CbOperation_SelectionChanged" />
+            <TextBlock Text="移動平均" />
+            <ComboBox Name="CbMovingAve" SelectionChanged="CbMovingAve_SelectionChanged" />
+            <TextBlock Text="背景色" />
+            <ComboBox Name="CbBackColor" SelectionChanged="CbBackColor_SelectionChanged" />
+            <TextBlock Text="データの種類" />
+            <ListBox Name="LbTitleList" SelectionMode="Single" Height="175" MouseDoubleClick="LbTitleList_MouseDoubleClick" 
+                     ToolTip="ダブルクリックするとチェックを反転する" >
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <CheckBox Content="{Binding Text}" IsChecked="{Binding Checked, Mode=TwoWay}" Click="CheckBox_Click" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.ContextMenu>
+                    <ContextMenu >
+                        <MenuItem Name="CmAllCheck" Header="すべてのチェックをつける" Click="CmCheckMenu_Click" />
+                        <MenuItem Name="CnAllNotCheck" Header="選択以外のすべてのチェックを外す" Click="CmCheckMenu_Click" />
+                        <MenuItem Name="CmReverseCheck" Header="チェックを反転する" Click="CmCheckMenu_Click" />
+                        <MenuItem Name="CmColorSet" Header="色を設定する" Click="CmCheckMenu_Click" />
+                        <MenuItem Name="CmScaleReset" Header="実値に戻す" Click="CmCheckMenu_Click" />
+                        <MenuItem Name="CmScale" Header="値をスケール倍する" Click="CmCheckMenu_Click" />
+                    </ContextMenu>
+                </ListBox.ContextMenu>
+            </ListBox>
+        </StackPanel>
+        <Canvas x:Name="canvas" >
+        </Canvas>
+    </DockPanel>
+</Window>

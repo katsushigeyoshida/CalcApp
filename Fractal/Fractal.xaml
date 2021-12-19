@@ -1,0 +1,23 @@
+﻿<Window x:Class="CalcApp.Fractal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CalcApp"
+        mc:Ignorable="d"
+        Title="フラクタル図形" Name="WindowForm" Height="500" Width="640" LayoutUpdated="WindowForm_LayoutUpdated" MouseDown="WindowForm_MouseDown" Closing="WindowForm_Closing" >
+    <Grid Name="grid" >
+        <StackPanel Name="panel">
+            <StatusBar>
+                <TextBlock Text="図形名" Height="18" Width="40" />
+                <ComboBox Name="comboBox" Height="30" SelectionChanged="ComboBox_SelectionChanged" Width="300" />
+                <TextBlock Text="分岐数" Width="40" />
+                <ComboBox Name="ordComboBox" Width="80" SelectionChanged="OrdComboBox_SelectionChanged" />
+                <StatusBarItem HorizontalAlignment="Right">
+                    <Button x:Name="helpBt" Content=" ? " Click="helpBt_Click" />
+                </StatusBarItem>
+            </StatusBar>
+        </StackPanel>
+        <Canvas x:Name="canvas" Margin="0,40,0,0" />
+    </Grid>
+</Window>
