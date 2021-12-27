@@ -13,10 +13,9 @@ namespace CalcApp
         private List<string[]> mData;       //  ファイルデータ
         private string[] mDataTitle;        //  ファイルデータのタイトル
         private bool[] mDataTitleUse;       //  タイトル列の有効の有無
-        //private double[] mDataScale;        //  項目データのスケール値
         private DATATYPE[] mDataType;       //  データタイプ
         private DATATYPE[] mDataSubType;    //  データサブタイプ
-        private List<double[]> mDoubleData; //  数値データ(1列めは縦軸データ)
+        private List<double[]> mDoubleData; //  数値データ(0列めは縦軸データ)
         private Rect mArea;                 //  数値データの領域
 
         private bool mError = false;
@@ -41,7 +40,6 @@ namespace CalcApp
             mDataTitleUse = new bool[mDataTitle.Length];    //  データ列の使用有無
             mDataType = new DATATYPE[mDataTitle.Length];    //  列のデータタイプ
             mDataSubType = new DATATYPE[mDataTitle.Length]; //  列の詳細データタイプ
-            //mDataScale = new double[mDataTitle.Length];     //  項目データのスケール値
             //  初期値設定
             for (int i = 0; i < mDataTitle.Length; i++) {
                 mDataSubType[i] = getDataType(mData, i);
@@ -284,6 +282,19 @@ namespace CalcApp
         }
 
         /// <summary>
+        /// 指定列のデータを取得する
+        /// </summary>
+        /// <param name="col">対象列</param>
+        /// <returns>データ配列</returns>
+        public string[] getRowData(int col)
+        {
+            string[] rowData = new string[mData.Count];
+            for (int i = 0; i < mData.Count; i++)
+                rowData[i] = mData[i][col];
+            return rowData;
+        }
+
+        /// <summary>
         /// タイトル列の有効の有無を取得
         /// </summary>
         /// <param name="n"></param>
@@ -406,7 +417,7 @@ namespace CalcApp
                         else if (dataType == DATATYPE.WEEKDAY)
                             continue;
                         else
-                            return DATATYPE.NUMBER;
+                            return DATATYPE.STRING;
                     } else if (ylib.IsTime(data[n])) {
                         //  時間
                         if (dataType == DATATYPE.NON)
@@ -414,21 +425,23 @@ namespace CalcApp
                         else if (dataType == DATATYPE.TIME)
                             continue;
                         else
-                            return DATATYPE.NUMBER;
-                    } else if (!ylib.IsNumberString(data[n])) {
-                        //  数値以外(文字列)
+                            return DATATYPE.STRING;
+                    } else if (ylib.IsNumberString(data[n])) {
+                        //  数値
                         if (dataType == DATATYPE.NON)
-                            dataType = DATATYPE.STRING;
-                        else if (dataType == DATATYPE.STRING)
+                            dataType = DATATYPE.NUMBER;
+                        else if (dataType == DATATYPE.NUMBER)
                             continue;
                         else
-                            return DATATYPE.NUMBER;
+                            return DATATYPE.STRING;
                     } else {
-                        //  数値
-                        return DATATYPE.NUMBER;
+                        //  文字列
+                        return DATATYPE.STRING;
                     }
                 }
             }
+            if (dataType == DATATYPE.WEEK || dataType == DATATYPE.MONTH || dataType == DATATYPE.YEAR)
+                dataType = DATATYPE.DATE;
             return dataType;
         }
 
@@ -1119,6 +1132,40 @@ namespace CalcApp
                 row = ylib.intParse(arg.Substring(sepNo2 + 1, arg.Length - sepNo2 - 2));
             }
             return (col, row);
+        }
+
+        /// <summary>
+        /// 日付を年単位/月単位/週単位に変換して最終列に追加
+        /// 変換種別 0:年単位  1:月単位  2:週単位  3:yyyy/mm/dd
+        /// </summary>
+        /// <param name="col">変換列</param>
+        /// <param name="convType">変換単位</param>
+        /// <returns>変換後のデータ</returns>
+        public SheetData DateConvert(int col, int convType)
+        {
+            if (convType < 0 || mDataType[col] != DATATYPE.DATE) {
+                mError = true;
+                mErrorMessage = "選択列に日付以外が含まれているか変換種別があっていません";
+                return null;
+            }
+            int[] dateType = new int[] { 6, 5, 9, 0 };
+            List<string[]> convertData = new List<string[]>();
+            string[] title = new string[mDataTitle.Length];
+            Array.Copy(mDataTitle, title, mDataTitle.Length);
+            for (int i = 0;i < mData.Count; i++) {
+                string[] data = new string[mData[i].Length];
+                for (int j = 0; j < mData[i].Length; j++) {
+                    if (j == col) {
+                        int jd = ylib.date2JulianDay(mData[i][j]);
+                        data[j] = ylib.JulianDay2DateYear(jd, dateType[convType % 4]);
+                    } else {
+                        data[j] = mData[i][j];
+                    }
+                }
+                convertData.Add(data);
+            }
+            SheetData sheetData = new SheetData(convertData, title);
+            return sheetData;
         }
 
 
