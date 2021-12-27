@@ -1,16 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using WpfLib;
 
 namespace CalcApp
@@ -58,13 +50,21 @@ namespace CalcApp
         private double mWindowHeight;                           //  ウィンドウ幅
         private double mPrevWindowWidth;                        //  変更前のウィンドウ幅
         private WindowState mWindowState = WindowState.Normal;  //  ウィンドウの状態(最大化/最小化)
-        private String mAppFolder;                              //  アプリケーションのフォルダ
-        private String mDataFileName = "FuncPlot.csv";          //  計算式保存ファイル名
-        private Dictionary<String, String[]> mFuncData = new Dictionary<String, String[]>(); //  計算式リストデータ
-        private String[] mFunctionType = { "Normal", "Parametric", "Polar" };   //  関数の種類(一般、媒介変数,極方程式)
+
+        private string mAppFolder;                              //  アプリケーションのフォルダ
+        private string mDataFileName = "FuncPlot.csv";          //  計算式保存ファイル名
+        private List<string[]> mFuncList;                       //  計算式リスト
+        private string[] mFuncListTitle = {                     //  計算式リストのタイトル
+            "タイトル", "関数式", "Xmin", "Xmax", "分割数", "種別", "Ymin", "Ymax", "高さ自動"
+        };
+        private string[] mFunctionType = {                      //  関数の種類(一般、媒介変数,極方程式)
+            "Normal", "Parametric", "Polar"
+        };
+        private bool mTitleSelectOn = true;
+        private bool mFuncSelectOn = true;
 
         private YWorldShapes ydraw;                     //  グラフィックライブラリ
-        private YLib mYlib = new YLib();                //  単なるライブラリ
+        private YLib ylib = new YLib();                 //  単なるライブラリ
 
         private double mXmin = 0;           //  グラフ表示エリア
         private double mXmax = 100;
@@ -73,6 +73,9 @@ namespace CalcApp
         private int mDivCount = 50;         //  関数グラフの分割数
         private List<Point[]> mPlotDatas;   //  表示用座標(x,y)データ
 
+        /// <summary>
+        /// 関数グラフのコンストラクタ
+        /// </summary>
         public FuncPlot()
         {
             InitializeComponent();
@@ -86,9 +89,11 @@ namespace CalcApp
             ydraw = new YWorldShapes(canvas);
 
             //  実行ファイルのフォルダを取得しワークフォルダとする
-            mAppFolder = System.AppDomain.CurrentDomain.BaseDirectory;
+            mAppFolder = AppDomain.CurrentDomain.BaseDirectory;
+            mDataFileName = mAppFolder + "\\" + mDataFileName;    //  ファイルパス
 
             //  初期値の設定
+            titleList.Text = "SQRT";
             functionList.Text = "sqrt([x])";
             setFunctionType(mFunctionType[0]);
             minX.Text = mXmin.ToString();
@@ -101,7 +106,7 @@ namespace CalcApp
             maxY.IsEnabled = (autoHeight.IsChecked != true);
 
             //  計算式の取り込みコンボボックスに登録する
-            loadDataFile();
+            loadFuncList(mDataFileName);
             setDataComboBox();
         }
 
@@ -112,8 +117,8 @@ namespace CalcApp
         /// <param name="e"></param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            mWindowWidth = this.Width;
-            mWindowHeight = this.Height;
+            mWindowWidth = Width;
+            mWindowHeight = Height;
         }
 
         /// <summary>
@@ -124,29 +129,30 @@ namespace CalcApp
         /// <param name="e"></param>
         private void Window_LayoutUpdated(object sender, EventArgs e)
         {
-            if (this.WindowState != mWindowState &&
-                this.WindowState == WindowState.Maximized) {
+            if (WindowState != mWindowState &&
+                WindowState == WindowState.Maximized) {
                 //  ウィンドウの最大化時
-                mWindowWidth = System.Windows.SystemParameters.WorkArea.Width;
-                mWindowHeight = System.Windows.SystemParameters.WorkArea.Height;
+                mWindowWidth = SystemParameters.WorkArea.Width;
+                mWindowHeight = SystemParameters.WorkArea.Height;
             } else if (this.WindowState != mWindowState ||
-                mWindowWidth != this.Width ||
-                mWindowHeight != this.Height) {
+                mWindowWidth != Width ||
+                mWindowHeight != Height) {
                 //  ウィンドウサイズが変わった時
-                mWindowWidth = this.Width;
-                mWindowHeight = this.Height;
+                mWindowWidth = Width;
+                mWindowHeight = Height;
             } else {
                 //  ウィンドウサイズが変わらない時は何もしない
-                mWindowState = this.WindowState;
+                mWindowState = WindowState;
                 return;
             }
 
             //  ウィンドウの大きさに合わせてコントロールの幅を変更する
             double dx = mWindowWidth - mPrevWindowWidth;
+            titleList.Width += dx;
             functionList.Width += dx;
             mPrevWindowWidth = mWindowWidth;
 
-            mWindowState = this.WindowState;
+            mWindowState = WindowState;
             DrawGraph();        //  グラフ表示
         }
 
@@ -158,7 +164,7 @@ namespace CalcApp
         /// <param name="e"></param>
         private void WindowForm_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            saveDataFile();     //  計算式の保存
+            saveFuncList(mDataFileName);    //  計算式の保存
             WindowFormSave();
         }
 
@@ -170,15 +176,15 @@ namespace CalcApp
             //  前回のWindowの位置とサイズを復元する(登録項目をPropeties.settingsに登録して使用する)
             Properties.Settings.Default.Reload();
             if (Properties.Settings.Default.FuncPlotWindowWidth < 100 || Properties.Settings.Default.FuncPlotWindowHeight < 100 ||
-                System.Windows.SystemParameters.WorkArea.Height < Properties.Settings.Default.FuncPlotWindowHeight) {
+                SystemParameters.WorkArea.Height < Properties.Settings.Default.FuncPlotWindowHeight) {
                 Properties.Settings.Default.FuncPlotWindowWidth = mWindowWidth;
                 Properties.Settings.Default.FuncPlotWindowHeight = mWindowHeight;
             } else {
-                this.Top = Properties.Settings.Default.FuncPlotWindowTop;
-                this.Left = Properties.Settings.Default.FuncPlotWindowLeft;
-                this.Width = Properties.Settings.Default.FuncPlotWindowWidth;
-                this.Height = Properties.Settings.Default.FuncPlotWindowHeight;
-                double dy = this.Height - mWindowHeight;
+                Top = Properties.Settings.Default.FuncPlotWindowTop;
+                Left = Properties.Settings.Default.FuncPlotWindowLeft;
+                Width = Properties.Settings.Default.FuncPlotWindowWidth;
+                Height = Properties.Settings.Default.FuncPlotWindowHeight;
+                double dy = Height - mWindowHeight;
             }
         }
 
@@ -188,11 +194,38 @@ namespace CalcApp
         private void WindowFormSave()
         {
             //  Windowの位置とサイズを保存(登録項目をPropeties.settingsに登録して使用する)
-            Properties.Settings.Default.FuncPlotWindowTop = this.Top;
-            Properties.Settings.Default.FuncPlotWindowLeft = this.Left;
-            Properties.Settings.Default.FuncPlotWindowWidth = this.Width;
-            Properties.Settings.Default.FuncPlotWindowHeight = this.Height;
+            Properties.Settings.Default.FuncPlotWindowTop = Top;
+            Properties.Settings.Default.FuncPlotWindowLeft = Left;
+            Properties.Settings.Default.FuncPlotWindowWidth = Width;
+            Properties.Settings.Default.FuncPlotWindowHeight = Height;
             Properties.Settings.Default.Save();
+        }
+
+        /// <summary>
+        /// [実行]ボタン 計算式からX,Yのデータを求めてグラフ表示する
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ExecuteBtn_Click(object sender, RoutedEventArgs e)
+        {
+            YCalc calc = new YCalc();
+            mXmin = calc.expression(minX.Text);
+            mXmax = calc.expression(maxX.Text);
+            mDivCount = (int)calc.expression(diveCount.Text);
+            string function = functionList.Text;
+
+            if (rbParametric.IsChecked == true) {
+                makeParametricData(function);           //  パラメトリック方程式
+            } else if (rbPolar.IsChecked == true) {
+                makePolarData(function);                //  極方程式
+            } else {
+                makeFunctionData(function);             //  一般的な方程式
+            }
+            if (0 < mPlotDatas.Count) {
+                DrawGraph();                            //  グラフ表示
+                dataRegist();                           //  設定値登録
+                functionList.Text = function;
+            }
         }
 
         /// <summary>
@@ -203,11 +236,8 @@ namespace CalcApp
         private void DeleteBtn_Click(object sender, RoutedEventArgs e)
         {
             if (0 < functionList.Items.Count) {
-                string key = getFunctionKey(functionList.Text, getCurFunctionType());
-                if (mFuncData.ContainsKey(key)) {
-                    mFuncData.Remove(key);          //  データの削除
-                    setDataComboBox();              //  コンボボックスのデータを更新
-                }
+                mFuncList.RemoveAt(functionList.SelectedIndex);
+                setDataComboBox();              //  コンボボックスのデータを更新
             }
         }
 
@@ -247,6 +277,23 @@ namespace CalcApp
         }
 
         /// <summary>
+        ///タイトルの選択
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TitleList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (0 < titleList.Items.Count) {
+                if (0 <= titleList.SelectedIndex && mTitleSelectOn) {
+                    dataFuncSet(titleList.SelectedIndex);
+                    mFuncSelectOn = false;
+                    functionList.SelectedIndex = titleList.SelectedIndex;
+                }
+            }
+            mTitleSelectOn = true;
+        }
+
+        /// <summary>
         /// 計算式の選択を変更
         /// </summary>
         /// <param name="sender"></param>
@@ -254,62 +301,39 @@ namespace CalcApp
         private void FunctionList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (0 < functionList.Items.Count) {
-                if (0 <= functionList.SelectedIndex) {
-                    //  計算式から登録キーワードを抽出
-                    String key = getKeyFuncData(functionList.Items[functionList.SelectedIndex].ToString());
-                    //  キーワードからデータを画面に設定
-                    if (key != null && 0 < key.Length) {
-                        if (mFuncData.ContainsKey(key)) {
-                            string[] data = mFuncData[key];
-                            //  変数の範囲を設定
-                            if (3 < data.Length) {
-                                minX.Text = data[1];        //  X min
-                                maxX.Text = data[2];        //  X max
-                                diveCount.Text = data[3];   //  分割数
-                            }
-                            if (4 < data.Length) {
-                                //  関数の種類を設定
-                                setFunctionType(data[4]);
-                            }
-                            if (7 < data.Length) {
-                                //  高さ方向の設定
-                                minY.Text = data[5];        //  Y min
-                                maxY.Text = data[6];        //  Y max
-                                autoHeight.IsChecked = data[7].CompareTo(false.ToString()) == 0 ? false : true;
-                            }
-                            setFunctionTypeTitle();
-                        }
-                    }
-                    setAutoHeight();
+                if (0 <= functionList.SelectedIndex && mFuncSelectOn) {
+                    dataFuncSet(functionList.SelectedIndex);
+                    mTitleSelectOn = false;
+                    titleList.SelectedIndex = functionList.SelectedIndex;
                 }
             }
+            mFuncSelectOn = true;
         }
 
         /// <summary>
-        /// [実行]ボタン 計算式からX,Yのデータを求めてグラフ表示する
+        /// 関数リストのデータをコントロールに
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ExecuteBtn_Click(object sender, RoutedEventArgs e)
+        /// <param name="n">関数リストの位置</param>
+        private void dataFuncSet(int n)
         {
-            YCalc calc = new YCalc();
-            mXmin = calc.expression(minX.Text);
-            mXmax = calc.expression(maxX.Text);
-            mDivCount = (int)calc.expression(diveCount.Text);
-            string function = functionList.Text;
-
-            if (rbParametric.IsChecked == true) {
-                makeParametricData(function);           //  パラメトリック方程式
-            } else if (rbPolar.IsChecked == true) {
-                makePolarData(function);                //  極方程式
-            } else {
-                makeFunctionData(function);             //  一般的な方程式
+            string[] data = mFuncList[n];
+            //  変数の範囲を設定
+            if (4 < data.Length) {
+                minX.Text = data[2];        //  X min
+                maxX.Text = data[3];        //  X max
+                diveCount.Text = data[4];   //  分割数
             }
-            if (0 < mPlotDatas.Count) {
-                DrawGraph();                            //  グラフ表示
-                dataRegist();                           //  設定値登録
-                functionList.Text = function;
+            if (5 < data.Length) {
+                setFunctionType(data[5]);   //  関数の種類を設定
             }
+            if (8 < data.Length) {
+                //  高さ方向の設定
+                minY.Text = data[6];        //  Y min
+                maxY.Text = data[7];        //  Y max
+                autoHeight.IsChecked = data[8].CompareTo(false.ToString()) == 0 ? false : true;
+            }
+            setFunctionTypeTitle();
+            setAutoHeight();
         }
 
         /// <summary>
@@ -348,10 +372,10 @@ namespace CalcApp
         /// 方程式からグラフデータを作成
         /// </summary>
         /// <param name="function">方程式</param>
-        private void makeFunctionData(String function)
+        private void makeFunctionData(string function)
         {
-            String[] buf = function.Split(';');
-            String errorMsg = "";
+            string[] buf = function.Split(';');
+            string errorMsg = "";
             YCalc calc = new YCalc();
             mPlotDatas = new List<Point[]>();
             double xStep = (mXmax - mXmin) / mDivCount;
@@ -405,10 +429,10 @@ namespace CalcApp
         /// 媒介変数による方程式(x=f(t);y=g(t))からグラフデータを作成
         /// </summary>
         /// <param name="function">方程式(x=f(t);y=g(t))</param>
-        private void makeParametricData(String function)
+        private void makeParametricData(string function)
         {
-            String[] buf = function.Split(';');
-            String errorMsg = "";
+            string[] buf = function.Split(';');
+            string errorMsg = "";
             YCalc calcX = new YCalc();
             YCalc calcY = new YCalc();
             mPlotDatas = new List<Point[]>();
@@ -496,10 +520,10 @@ namespace CalcApp
         /// </summary>
         /// <param name="function">方程式</param>
         /// <returns></returns>
-        private void makePolarData(String function)
+        private void makePolarData(string function)
         {
-            String[] buf = function.Split(';');
-            String errorMsg = "";
+            string[] buf = function.Split(';');
+            string errorMsg = "";
             YCalc calcR = new YCalc();
             mPlotDatas = new List<Point[]>();
             double tStep = (mXmax - mXmin) / mDivCount;
@@ -564,21 +588,20 @@ namespace CalcApp
         /// </summary>
         private void dataRegist()
         {
-            String[] data = new String[8];
-            data[0] = functionList.Text.Trim();
-            data[1] = minX.Text;
-            data[2] = maxX.Text;
-            data[3] = diveCount.Text;
-            data[4] = getCurFunctionType();
-            data[5] = minY.Text;
-            data[6] = maxY.Text;
-            data[7] = autoHeight.IsChecked.ToString();
-            string key = getFunctionKey(functionList.Text, getCurFunctionType());
-            if (mFuncData.ContainsKey(key)) {
-                mFuncData[key] = data;
-            } else {
-                mFuncData.Add(key, data);
+            string[] data = new string[mFuncListTitle.Length];
+            data[0] = titleList.Text.Trim();
+            data[1] = functionList.Text.Trim();
+            data[2] = minX.Text;
+            data[3] = maxX.Text;
+            data[4] = diveCount.Text;
+            data[5] = getCurFunctionType();
+            data[6] = minY.Text;
+            data[7] = maxY.Text;
+            data[8] = autoHeight.IsChecked.ToString();
+            if (0 <= titleList.SelectedIndex && data[0].CompareTo(mFuncList[titleList.SelectedIndex][0]) == 0) {
+                mFuncList.RemoveAt(titleList.SelectedIndex);
             }
+            mFuncList.Insert(0, data);
             setDataComboBox();      //  計算式をコンボボックスに登録
         }
 
@@ -590,7 +613,7 @@ namespace CalcApp
         private List<string[]> getArguments(string function)
         {
             List<string[]> arguments = new List<string[]>();
-            String[] buf = function.Split(';');
+            string[] buf = function.Split(';');
             for (int i = 0; i < buf.Length; i++) {
                 if (0 < buf[i].Length && 0 < buf[i].IndexOf('=')) {
                     string[] argVal = new string[2];
@@ -664,17 +687,12 @@ namespace CalcApp
         /// </summary>
         private void setDataComboBox()
         {
-            if (0 < mFuncData.Count) {
-                List<string> functionData = new List<string>();
-                foreach (String key in mFuncData.Keys) {
-                    functionData.Add(key);
-                }
-                functionData.Sort();
+            if (0 < mFuncList.Count) {
+                titleList.Items.Clear();
                 functionList.Items.Clear();
-                foreach (String key in functionData) {
-                    //  登録キーワードと計算式が異なる場合があるので都度計算式を取得
-                    string[] data = mFuncData[key];
-                    functionList.Items.Add(data[0]);
+                foreach (string[] data in mFuncList) {
+                    titleList.Items.Add(data[0]);
+                    functionList.Items.Add(data[1]);
                 }
             }
         }
@@ -717,8 +735,8 @@ namespace CalcApp
             ydraw.setTextColor(Brushes.Black);
             ydraw.setColor(Brushes.Aqua);
             ydraw.drawRectangle(mXmin, ymax, dx, dy, 0);
-            double auxDx = mYlib.graphStepSize(dx, 5);
-            double auxDy = mYlib.graphStepSize(dy, 5);
+            double auxDx = ylib.graphStepSize(dx, 5);
+            double auxDy = ylib.graphStepSize(dy, 5);
             for (x = Math.Floor(mXmin / auxDx) * auxDx; x <= mXmax; x += auxDx) {
                 if (mXmin <= x && x <= mXmax) {
                     if (x == 0) {
@@ -811,75 +829,49 @@ namespace CalcApp
         }
 
         /// <summary>
-        /// 計算式から登録キーワードを検索する
+        /// 関数リストをファイルから読み出す
         /// </summary>
-        /// <param name="function">計算式</param>
-        /// <returns>登録キーワード</returns>
-        private String getKeyFuncData(String function)
+        /// <param name="path">ファイル名</param>
+        private void loadFuncList(string path)
         {
-            foreach (KeyValuePair<String, String[]> kvp in mFuncData) {
-                if (kvp.Value[0].CompareTo(function) == 0)
-                    return kvp.Key;
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// 計算式のリストをファイルに保存(CSV形式)
-        /// </summary>
-        private void saveDataFile()
-        {
-            String filePath = mAppFolder + "\\" + mDataFileName;    //  ファイルパス
-            if (0 < mFuncData.Count) {
-                System.IO.StreamWriter dataFile = new System.IO.StreamWriter(filePath, false);
-                dataFile.WriteLine("関数式,Xmin,Xmax,分割数,種別,Ymin,Ymax,高さ自動");
-                foreach (KeyValuePair<String, String[]> kvp in mFuncData) {
-                    dataFile.WriteLine("\"" + kvp.Value[0] + "\",\"" + kvp.Value[1] + "\",\"" +
-                         kvp.Value[2] + "\",\"" + kvp.Value[3] + "\",\"" + kvp.Value[4] + "\",\"" +
-                        kvp.Value[5] + "\",\"" + kvp.Value[6] + "\",\"" + kvp.Value[7] + "\"");
-                }
-                dataFile.Close();
-            }
-        }
-
-        /// <summary>
-        /// ファイルから計算式を取り込む
-        /// </summary>
-        private void loadDataFile()
-        {
-            String filePath = mAppFolder + "\\" + mDataFileName;    //  ファイルパス
-            if (System.IO.File.Exists(filePath)) {
-                System.IO.StreamReader dataFile = new System.IO.StreamReader(filePath);
-                mFuncData.Clear();
-                String line;
-                while ((line = dataFile.ReadLine()) != null) {
-                    String[] buf = mYlib.seperateString(line);
-                    if (buf[0].CompareTo("関数式") != 0) {
-                        String[] data = new string[8];
-                        for (int i = 0; i < data.Length; i++)
-                            data[i] = "";
-                        if (3 < buf.Length) {
-                            data[0] = buf[0];           //  関数式
-                            data[1] = buf[1];           //  Xmin
-                            data[2] = buf[2];           //  Xmax
-                            data[3] = buf[3];           //  分割数
-                            if (4 < buf.Length)         //  種別
-                                data[4] = buf[4];
-                            else
-                                data[4] = mFunctionType[0];
-                            if (7 < buf.Length) {
-                                data[5] = buf[5];       //  Ymin
-                                data[6] = buf[6];       //  Ymax
-                                data[7] = buf[7];       //  高さ自動
-                            }
-                            string key = getFunctionKey(buf[0], data[4]);
-                            if (!mFuncData.ContainsKey(key))
-                                mFuncData.Add(key, data);
-                        }
+            List<string[]> funcList = ylib.loadCsvData(path, mFuncListTitle, true);
+            if (funcList == null)
+                return;
+            if (mFuncList == null)
+                mFuncList = new List<string[]>();
+            else
+                mFuncList.Clear();
+            for (int i = 0; i < funcList.Count; i++) {
+                if (funcList[i].Length < 2)
+                    continue;
+                string[] func = new string[funcList[i].Length];
+                if (funcList[i][0].Length == 0) {
+                    //  タイトル欄が存在しない時
+                    if (funcList[i][1][0] == '$') {
+                        func[0] = funcList[i][1].Substring(1, funcList[i][1].IndexOf(";") - 1);
+                        func[1] = funcList[i][1].Substring(funcList[i][1].IndexOf(";") + 1);
+                    } else {
+                        func[0] = funcList[i][1];
+                        func[1] = funcList[i][1];
                     }
+                } else {
+                    //  タイトル欄が存在する
+                    func[0] = funcList[i][0];
+                    func[1] = funcList[i][1];
                 }
-                dataFile.Close();
+                for (int j = 2; j < funcList[i].Length; j++)
+                    func[j] = funcList[i][j];
+                mFuncList.Add(func);
             }
+        }
+
+        /// <summary>
+        /// 関数リストをファイルに保存
+        /// </summary>
+        /// <param name="path">ファイル名</param>
+        private void saveFuncList(string path)
+        {
+            ylib.saveCsvData(path, mFuncListTitle, mFuncList);
         }
     }
 }

@@ -7,19 +7,29 @@
         mc:Ignorable="d"
         Title="関数グラフ" Height="300" Width="580" LayoutUpdated="Window_LayoutUpdated" Loaded="Window_Loaded" Closing="WindowForm_Closing">
     <Grid>
-        <StatusBar Name="statusBar" Height="30" VerticalAlignment="Top" >
+        <StatusBar Height="30" Margin="0,0,0,0" VerticalAlignment="Top">
+            <StatusBarItem Width="60">
+                <TextBlock Text="タイトル" />
+            </StatusBarItem>
+            <StatusBarItem  >
+                <ComboBox Name="titleList" IsEditable="True" FontSize="14" Width="450" SelectionChanged="TitleList_SelectionChanged"  />
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">
+                <Button x:Name="executeBtn" Content="実行" Width="40" Click="ExecuteBtn_Click"/>
+            </StatusBarItem>
+        </StatusBar>
+        <StatusBar Name="statusBar" Height="30" VerticalAlignment="Top" Margin="0,30,0,0" >
             <StatusBarItem Width="60" >
                 <TextBlock Text="関数 f(x)" x:Name="functionTitle" />
             </StatusBarItem>
             <StatusBarItem  >
-                <ComboBox Name="functionList" IsEditable="True" FontSize="14" Width="400" SelectionChanged="FunctionList_SelectionChanged" />
+                <ComboBox Name="functionList" IsEditable="True" FontSize="14" Width="450" SelectionChanged="FunctionList_SelectionChanged" />
             </StatusBarItem>
-            <Button x:Name="funcMenuBtn" Content="関数" Width="40" Click="FuncMenuBtn_Click" />
             <StatusBarItem HorizontalAlignment="Right">
-                <Button x:Name="executeBtn" Content="実行" Width="40" Click="ExecuteBtn_Click"/>
+                <Button x:Name="funcMenuBtn" Content="関数" Width="40" Click="FuncMenuBtn_Click" />
             </StatusBarItem>
         </StatusBar >
-        <StatusBar  Name="statusBar2" Height="30" VerticalAlignment="Top" Margin="0,30,0,0" >
+        <StatusBar  Name="statusBar2" Height="30" VerticalAlignment="Top" Margin="0,60,0,0" >
             <TextBlock Text="範囲 x min" Name="rengeTitle" />
             <TextBox x:Name="minX" Height="23" Canvas.Left="396" TextWrapping="Wrap" Canvas.Top="18" Width="50"/>
             <TextBlock Text=" max" />
@@ -34,7 +44,7 @@
                 <Button x:Name="deleteBtn" Content="削除" Width="40" Click="DeleteBtn_Click" />
             </StatusBarItem>
         </StatusBar>
-        <StatusBar Name="statusBar3" Height="30" VerticalAlignment="Top" Margin="0,60,0,0">
+        <StatusBar Name="statusBar3" Height="30" VerticalAlignment="Top" Margin="0,90,0,0">
             <TextBlock Text="範囲 y min" Name="rengeYTitle" />
             <TextBox x:Name="minY" Height="23" Canvas.Left="396" TextWrapping="Wrap" Canvas.Top="18" Width="50"/>
             <TextBlock Text=" max" />
@@ -46,6 +56,6 @@
                 <Button x:Name="helpBtn" Content=" ? " Click="helpBtn_Click"/>
             </StatusBarItem>
         </StatusBar>
-        <Canvas x:Name="canvas" Background="White" Margin="0,95,0,0" />
+        <Canvas x:Name="canvas" Background="White" Margin="0,125,0,0" />
     </Grid>
 </Window>
