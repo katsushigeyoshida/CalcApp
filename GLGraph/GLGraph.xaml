@@ -7,11 +7,13 @@
         mc:Ignorable="d"
         Title="3Dグラフ" Name="GLWindow" Height="450" Width="600" LayoutUpdated="GLWindow_LayoutUpdated" Closing="GLWindow_Closing">
     <DockPanel>
+        <StatusBar Height="30" DockPanel.Dock="Top" >
+            <TextBlock Text="タイトル" Width="130" />
+            <ComboBox Name="titleList" IsEditable="True" Width="380" SelectionChanged="titleList_SelectionChanged" />
+        </StatusBar>
         <StatusBar Height="30" DockPanel.Dock="Top">
-            <TextBlock x:Name="functionTitle" Text="関数 z=f(x,y)" />
-            <ComboBox x:Name="functionList" IsEditable="True" FontSize="14" Width="277" SelectionChanged="functionList_SelectionChanged"  />
-            <CheckBox x:Name="dispModel" Content="サーフェイス" Click="DispModel_Click" />
-            <CheckBox x:Name="backBlack" Content="背景黒" Click="backBlack_Click"  />
+            <TextBlock x:Name="functionTitle" Text="関数 z=f(x,y)" Width="130" />
+            <ComboBox x:Name="functionList" IsEditable="True" FontSize="14" Width="380" SelectionChanged="functionList_SelectionChanged"  />
             <StatusBarItem HorizontalAlignment="Right">
                 <Button x:Name="executeBtn" Content="実行" Width="40" Click="executeBtn_Click" />
             </StatusBarItem>
@@ -36,6 +38,8 @@
             <TextBox x:Name="maxY" Height="23" Canvas.Left="396" TextWrapping="Wrap" Canvas.Top="18" Width="50"/>
             <TextBlock Text="分割数 n" />
             <TextBox x:Name="diveYCount" Height="23" Canvas.Left="396" TextWrapping="Wrap" Canvas.Top="18" Width="50"/>
+            <CheckBox x:Name="dispModel" Content="サーフェイス" Click="DispModel_Click" />
+            <CheckBox x:Name="backBlack" Content="背景黒" Click="backBlack_Click"  />
             <StatusBarItem HorizontalAlignment="Right">
                 <Button x:Name="funcMenuBtn" Content="関数" Width="40" Click="funcMenuBtn_Click"  />
             </StatusBarItem>
