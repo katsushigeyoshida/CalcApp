@@ -122,7 +122,7 @@ namespace CalcApp
         private WindowState mWindowState = WindowState.Normal;  //  ウィンドウの状態(最大化/最小化)
 
         private string mFileTitle;          //  データファイルタイトル
-        private string mFileListPath;       //  データファイルパスリストのパス
+        private string mFileListPath = "SpreadSheetFileList.csv";       //  データファイルパスリストのパス
         private int mFileListMax = 50;      //  データファイルリストの最大値
         private string mAppFolder;          //  アプリフォルダ
         private SheetData mData;            //  表示データ
@@ -131,7 +131,8 @@ namespace CalcApp
         private int mEncordType = 0;        //  文字コード 0: UTF8 1:Shift-Jis 2:Euc-Jp
         private string[] mEncodeTitle = new string[] { "UTF8", "SJIS", "EUC" };
         private List<FileManageData> mFileManageList;   //  データファイル管理リスト
-        private string mConvFileFolder;     //  データ置換えファイルフォルダ
+        private string mConvFileFolder = "ConvDic";     //  データ置換えファイルフォルダ
+        private string mDownLoadFolder = "DownLoad";    //  ダアンロードファイルの保存パス
 
         //  関数の配列化にデリゲートを使用
         class iClassFuc
@@ -159,23 +160,25 @@ namespace CalcApp
             mFuncList.Add(new iClassFuc(convDoubleData,     "数値化処理"));
             mFuncList.Add(new iClassFuc(zen2hanData,        "全角数値を半角に変換"));
             mFuncList.Add(new iClassFuc(transposeMatrix,    "縦横反転"));
-            mFuncList.Add(new iClassFuc(sumData,            "合計値追加"));
-            mFuncList.Add(new iClassFuc(verticalSumData,    "縦方向合計値"));
             mFuncList.Add(new iClassFuc(accumulateData,     "増分⇒累積"));
             mFuncList.Add(new iClassFuc(defferntialData,    "累積⇒増分"));
-            mFuncList.Add(new iClassFuc(addColumnData,      "[集計系列 + 集計項目]を追加"));
-            mFuncList.Add(new iClassFuc(subColumnData,      "[集計系列 - 集計項目]を追加"));
-            mFuncList.Add(new iClassFuc(multiColumnData,    "[集計系列 * 集計項目]を追加"));
-            mFuncList.Add(new iClassFuc(divideColumnData,   "[集計系列 / 集計項目]を追加"));
-            mFuncList.Add(new iClassFuc(addColumnDatas,     "[集計系列～集計項目の和]を追加"));
-            mFuncList.Add(new iClassFuc(multiColumnDatas,   "[集計系列～集計項目の積]を追加"));
-            mFuncList.Add(new iClassFuc(rateData,           "[集計系列]のセルの割合を追加"));
-            mFuncList.Add(new iClassFuc(calcColumnData,     "[集計系列]の演算処理"));
+            mFuncList.Add(new iClassFuc(sumData,            "合計値追加"));
+            mFuncList.Add(new iClassFuc(verticalSumData,    "縦方向合計値"));
+            //mFuncList.Add(new iClassFuc(addColumnDatas,     "[集計系列～集計項目の和]を追加"));
+            //mFuncList.Add(new iClassFuc(multiColumnDatas,   "[集計系列～集計項目の積]を追加"));
+            //mFuncList.Add(new iClassFuc(rateData,           "[集計系列]のセルの割合を追加"));
+            //mFuncList.Add(new iClassFuc(calcColumnData,     "[集計系列]の演算処理"));
             mFuncList.Add(new iClassFuc(calcExpressData,    "行単位の数式処理"));
-            mFuncList.Add(new iClassFuc(dateYearConvert,    "[集計系列]を年単位にして追加"));
-            mFuncList.Add(new iClassFuc(dateMonthConvert,   "[集計系列]を月単位にして追加"));
-            mFuncList.Add(new iClassFuc(dateWeekConvert,    "[集計系列]を週単位にして追加"));
-            mFuncList.Add(new iClassFuc(dateWeekdayConvert, "[集計系列]を曜日にして追加"));
+            mFuncList.Add(new iClassFuc(dateConvert,        "[集計系列]の日付を変換"));
+            //mFuncList.Add(new iClassFuc(addColumnData,      "[集計系列 + 集計項目]を追加"));
+            //mFuncList.Add(new iClassFuc(subColumnData,      "[集計系列 - 集計項目]を追加"));
+            //mFuncList.Add(new iClassFuc(multiColumnData,    "[集計系列 * 集計項目]を追加"));
+            //mFuncList.Add(new iClassFuc(divideColumnData,   "[集計系列 / 集計項目]を追加"));
+            mFuncList.Add(new iClassFuc(dateConvertAdd,     "[集計系列]の日付を変換して追加"));
+            //mFuncList.Add(new iClassFuc(dateYearConvert,    "[集計系列]を年単位にして追加"));
+            //mFuncList.Add(new iClassFuc(dateMonthConvert,   "[集計系列]を月単位にして追加"));
+            //mFuncList.Add(new iClassFuc(dateWeekConvert,    "[集計系列]を週単位にして追加"));
+            //mFuncList.Add(new iClassFuc(dateWeekdayConvert, "[集計系列]を曜日にして追加"));
             mFuncList.Add(new iClassFuc(yearCompareData,    "年比較データ作成"));
             mFuncList.Add(new iClassFuc(selectLineMerge,    "選択行の結合"));
             mFuncList.Add(new iClassFuc(selectLineNotRemove,"選択行以外を削除"));
@@ -211,8 +214,8 @@ namespace CalcApp
             ylib = new YLib();
 
             mAppFolder = ylib.getAppFolderPath();   //  アプリフォルダ
-            mFileListPath = Path.Combine(mAppFolder, "SpreadSheetFileList.csv");
-            mConvFileFolder = Path.Combine(mAppFolder, "ConvDic");
+            mFileListPath = Path.Combine(mAppFolder, mFileListPath);
+            mConvFileFolder = Path.Combine(mAppFolder, mConvFileFolder);
             ylib.setEncording(0);
             loadPathList(mFileListPath, true);      //  ファイルリストの読み込み
             setAddressTitle();
@@ -319,7 +322,8 @@ namespace CalcApp
         /// <param name="e"></param>
         private void TbReference_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            System.Diagnostics.Process.Start(TbReference.Text.ToLower());
+            if (0 < TbReference.Text.Length)
+                System.Diagnostics.Process.Start(TbReference.Text.ToLower());
         }
 
         /// <summary>
@@ -423,7 +427,7 @@ namespace CalcApp
         }
 
         /// <summary>
-        /// [読込]ボタンのメニュー
+        /// [読込]右ボタンのメニュー
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -433,7 +437,8 @@ namespace CalcApp
            if (menuItem.Name.CompareTo("removeFileMenu") == 0) {
                 removeFileCommand();
             } else if (menuItem.Name.CompareTo("referenceFileMenu") == 0) {
-                System.Diagnostics.Process.Start(TbReference.Text.ToLower());
+                if (0 < TbReference.Text.Length)
+                    System.Diagnostics.Process.Start(TbReference.Text.ToLower());
             } else if (menuItem.Name.CompareTo("downloadFileMenu") == 0) {
                 executeFileRead(false);
             } else if (menuItem.Name.CompareTo("clearFileMenu") == 0) {
@@ -773,6 +778,50 @@ namespace CalcApp
         }
 
         /// <summary>
+        /// 日付変換
+        /// 日付を年、月、週単位に変換する
+        /// </summary>
+        private void dateConvert()
+        {
+            if (0 < CbComboYList.Text.Length) {
+                int dateType = 0;
+                SelectMenu selMenu = new SelectMenu();
+                selMenu.Title = "日付変換を選択";
+                string[] menuList = { "年単位", "月単位", "週単位", "yyyy/mm/dd" };
+                selMenu.mMenuList = menuList;
+                if (selMenu.ShowDialog() == true) {
+                    dateType = Array.IndexOf(menuList, selMenu.mSelectItem);
+                }
+                int n = CbComboYList.SelectedIndex;         //  日付の列
+                SheetData convertDate = mData.DateConvert(n, dateType);
+                if (convertDate != null) {
+                    mDataList.Add(convertDate);             //  変換したデータを履歴に登録
+                    setDataDisp(mDataList[mDataList.Count - 1]);
+                } else if (mData.getError()) {
+                    MessageBox.Show(mData.getErrorMessage());
+                }
+            }
+        }
+
+        /// <summary>
+        /// 日付を変換して行末に追加
+        /// </summary>
+        private void dateConvertAdd()
+        {
+            if (0 < CbComboYList.Text.Length) {
+                int dateType = 0;
+                SelectMenu selMenu = new SelectMenu();
+                selMenu.Title = "日付を変換して行末に追加";
+                string[] menuList = { "年単位", "月単位", "週単位", "曜日" };
+                selMenu.mMenuList = menuList;
+                if (selMenu.ShowDialog() == true) {
+                    dateType = Array.IndexOf(menuList, selMenu.mSelectItem);
+                    dateConvert(dateType);
+                }
+            }
+        }
+
+        /// <summary>
         /// 日付の指定列を年単位に変換して最後尾列に追加
         /// </summary>
         private void dateYearConvert()
@@ -926,7 +975,11 @@ namespace CalcApp
             if (0 < CbComboYList.Text.Length) {
                 int n = CbComboYList.SelectedIndex;
                 int m = CbComboXList.SelectedIndex;
-                m = m < n ? 0 : m - n;
+                if (n == m)
+                    return;
+                if (m < n)
+                    YLib.Swap(ref n, ref m);
+                m = m - n;
                 if (mData.getDataType(n) == SheetData.DATATYPE.NUMBER && mData.getDataType(n + 1) == SheetData.DATATYPE.NUMBER) {
                     SheetData addData = mData.CombineData(n, m, true);
                     if (addData != null) {
@@ -1332,15 +1385,19 @@ namespace CalcApp
             string filePath = fileDownLoad(path, download);
             if (filePath.Length < 1 || !File.Exists(filePath))
                 return false;
+
             // GZIPファイルであれば解凍する
             byte[] header = ylib.loadBinData(filePath, 2);
             if (header[0] == 0x1f && header[1] == 0x8b)     //  gzipファイルの確認
                 ylib.gzipDecompress(filePath, filePath);    //  gzipファイルの解凍
+
             //  ファイルの読み込み
             TbRowInfo.Text = "データ読込中";
             ylib.DoEvents();
             mFileData = loadDataFile(filePath, tabSep);     //  CSV/NDJSONファイルからデータの取り込
             if (mFileData != null) {
+                TbRowInfo.Text = "表データ作成中";
+                ylib.DoEvents();
                 mDataList.Add(mFileData.getSheetData());
                 setDataDisp(mDataList[mDataList.Count - 1]);
             }
@@ -1357,10 +1414,9 @@ namespace CalcApp
         private string  fileDownLoad(string filePath, bool download = true)
         {
             if (filePath.IndexOf("http://") == 0 || filePath.IndexOf("https://") == 0) {
-                string folder = "DownLoad";
-                if (!Directory.Exists(folder))
-                    Directory.CreateDirectory(folder);
-                string downLoadFile = folder + "\\" + filePath.Substring(filePath.LastIndexOf("/") + 1);
+                if (!Directory.Exists(mDownLoadFolder))
+                    Directory.CreateDirectory(mDownLoadFolder);
+                string downLoadFile = mDownLoadFolder + "\\" + filePath.Substring(filePath.LastIndexOf("/") + 1);
                 if (download || !File.Exists(downLoadFile)) {
                     TbRowInfo.Text = "ダウンロード中";
                     ylib.DoEvents();
