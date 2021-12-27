@@ -22,7 +22,7 @@ namespace CalcApp
         private YLib mYlib = new YLib();                //  単なるライブラリ
         public SheetData mSheetData;                    //  グラフの元データ
         private DoubleList mDoubleList;                 //  グラフ用数値データクラス
-        private string[] mDataTitle;                    //  データの種類名
+        //private string[] mDataTitle;                    //  データの種類名
         private Stack<DoubleList> mStackDoubeData = new Stack<DoubleList>();    //  数値データスタック
 
         public string mWindowTitle="";
@@ -33,8 +33,8 @@ namespace CalcApp
         private double mStepXsize;                      //  グラフの補助線の間隔
         private Rect mArea;                             //  グラフの表示領域
         private double mBarWidth;                       //  棒グラフの棒の幅
-        private SheetData.DATATYPE mDataType;           //  各列のデータタイプ
-        private SheetData.DATATYPE mDataSubType;        //  各列のデータタイプ
+        //private SheetData.DATATYPE mDataType;           //  各列のデータタイプ
+        //private SheetData.DATATYPE mDataSubType;        //  各列のデータタイプ
 
         public enum GRAPHTYPE {LINE_GRAPH, BAR_GRAPH, STACKEDLINE_GRAPH, STACKEDBAR_GRAPH}
         private GRAPHTYPE mGraphType = GRAPHTYPE.LINE_GRAPH;
@@ -246,7 +246,6 @@ namespace CalcApp
                         mStackDoubeData.Push(mDoubleList);
                         mDoubleList = mDoubleList.fromCopy();
                         mDoubleList.smoothData(mYlib.intParse(dlg.mEditText), 1);
-                        //mGraphData = mDoubleList.mData;
                     }
                     break;
                 case 3:         //  元に戻す
@@ -394,14 +393,15 @@ namespace CalcApp
         private void InitData()
         {
             //  データの前処理
-            mSheetData.dataSqueeze();                           //  1列目に不要なデータのある行は削除する
+            mSheetData.dataSqueeze();                                   //  1列目に不要なデータのある行は削除する
             if (mSheetData.getDataType(0) != SheetData.DATATYPE.STRING)
-                mSheetData.Sort(0, true);                       //  縦軸タイトルが文字列以外はタイトル列目でソート
-            mSheetData.stringTable2doubleTable();               //  数値データに変換
-            mDataTitle = mSheetData.getTitle();                 //  データ列タイトル取得
-            mDataType  = mSheetData.getDataType(0);             //  列データの種類取得
-            mDataSubType = mSheetData.getDataSubType(0);        //  列データの種類取得
+                mSheetData.Sort(0, true);                               //  縦軸タイトルが文字列以外はタイトル列目でソート
+            mSheetData.stringTable2doubleTable();                       //  数値データに変換
             mDoubleList = new DoubleList(mSheetData.getDoubleTable());  //  グラフデータの取得
+            mDoubleList.mDataTitle = mSheetData.getTitle();             //  データ列タイトル取得
+            mDoubleList.mRowTitle = mSheetData.getRowData(0);           //  行タイトルの取得
+            mDoubleList.mDataType  = mSheetData.getDataType(0);         //  列データの種類取得
+            mDoubleList.mDataSubType = mSheetData.getDataSubType(0);    //  列データの種類取得
 
             //  開始位置と終了位置を設定
             CbStartPos.Items.Clear();
@@ -414,8 +414,8 @@ namespace CalcApp
             mEndPos = mSheetData.getDataSize() - 1;
 
             //  凡例の選択リスト
-            for(int i = 1; i < mDataTitle.Length; i++) {
-                mLegendItems.Add(new CheckBoxListItem(true, mDataTitle[i]));
+            for(int i = 1; i < mDoubleList.mDataTitle.Length; i++) {
+                mLegendItems.Add(new CheckBoxListItem(true, mDoubleList.mDataTitle[i]));
             }
             LbTitleList.Items.Clear();
             LbTitleList.ItemsSource = mLegendItems;
@@ -467,7 +467,7 @@ namespace CalcApp
                 double ys = mArea.Y < 0 ? 0 : mArea.Y;
                 double ye = 0;
                 int n = 0;
-                for (int j = 1; j < mDataTitle.Length; j++) {
+                for (int j = 1; j < mDoubleList.mDataTitle.Length; j++) {
                     //  データの種別確認
                     if (!mLegendItems[j - 1].Checked)
                         continue;
@@ -484,7 +484,7 @@ namespace CalcApp
                     } else if (mGraphType == GRAPHTYPE.BAR_GRAPH) {
                         //  棒グラフ
                         ye = pe[j];
-                        if (200 < (mEndPos - mStartPos) * mDataTitle.Length)
+                        if (200 < (mEndPos - mStartPos) * mDoubleList.mDataTitle.Length)
                             ydraw.setColor(mDoubleList.mColor[j]);
                         ydraw.setFillColor(mDoubleList.mColor[j]);
                         ydraw.drawRectangle(new Point(pe[0] - barXOffset + barWidth * n, ys),
@@ -505,7 +505,7 @@ namespace CalcApp
             if (1 < mMovingAveSize) {
                 //  移動平均の折線追加
                 if (mGraphType == GRAPHTYPE.BAR_GRAPH) {
-                    for (int j = 1; j < mDataTitle.Length; j++) {
+                    for (int j = 1; j < mDoubleList.mDataTitle.Length; j++) {
                         if (!mLegendItems[j - 1].Checked)
                             continue;
                         double[] barData = getBarData(j);
@@ -564,7 +564,7 @@ namespace CalcApp
 
             for (int i= 0; i < mDoubleList.mData.Count; i++) {
                 stackedData[i] = 0;
-                for (int j = 1; j < mDataTitle.Length; j++) {
+                for (int j = 1; j < mDoubleList.mDataTitle.Length; j++) {
                     if (!mLegendItems[j - 1].Checked)
                         continue;
                     stackedData[i] += mDoubleList.mData[i][j];
@@ -588,22 +588,13 @@ namespace CalcApp
                 mDoubleList.mDisp[i + 1] = mLegendItems[i].Checked;
 
             //  グラフ領域の設定
-            if (mGraphType == GRAPHTYPE.LINE_GRAPH) {
-                mArea = mDoubleList.getArea(false, mStartPos, mEndPos);
-            } else if (mGraphType == GRAPHTYPE.STACKEDLINE_GRAPH) {
-                mArea = mDoubleList.getArea(true, mStartPos, mEndPos);
-            } else if (mGraphType == GRAPHTYPE.BAR_GRAPH) {
-                mArea = mDoubleList.getArea(false, mStartPos, mEndPos);
-                mArea.Height += mDoubleList.mData[mEndPos][0] - mDoubleList.mData[mEndPos - 1][0];
-            } else if (mGraphType == GRAPHTYPE.STACKEDBAR_GRAPH) {
-                mArea = mDoubleList.getArea(true, mStartPos, mEndPos);
-                mArea.Height += mDoubleList.mData[mEndPos][0] - mDoubleList.mData[mEndPos - 1][0];
-            } else {
-                mArea = mDoubleList.getArea(false, mStartPos, mEndPos);
-            }
-            mArea = mSheetData.transpositionArea(mArea);        //  領域データの縦横を反転
+            bool stack = mGraphType == GRAPHTYPE.STACKEDLINE_GRAPH || mGraphType == GRAPHTYPE.STACKEDBAR_GRAPH;
+            bool bar = mGraphType == GRAPHTYPE.BAR_GRAPH || mGraphType == GRAPHTYPE.STACKEDBAR_GRAPH;
+            mArea = mDoubleList.getArea(stack, bar, mStartPos, mEndPos);
+            mArea = new Rect(mArea.Y, mArea.X, mArea.Height, mArea.Width);  //  領域データの縦横を反転
             double y = mArea.Y;
             if (0 < mArea.Y) {
+                //  基底を0に設定
                 mArea.Y = 0;
                 mArea.Height += y - mArea.Y;
             }
@@ -614,6 +605,7 @@ namespace CalcApp
 
             //  グラフ高さの調整
             if (mArea.Y < 0) {
+                //  基底が負の時の下限値
                 mArea.Y = ((int)(mArea.Y / mStepYsize) - 1) * mStepYsize;
                 mArea.Height += y - mArea.Y;
             }
@@ -634,49 +626,39 @@ namespace CalcApp
         private void setGraphArea()
         {
             //  グラフエリアの仮設定
-            ydraw.setWorldWindow(mArea.X - mArea.Width * 0.05, mArea.Y + mArea.Height * (1 + 0.05),
-                mArea.X + mArea.Width * (1 + 0.05), mArea.Y - mArea.Height * 0.1);
+            ydraw.setWorldWindow(mArea.X, mArea.Y, mArea.Right, mArea.Y - mArea.Height);
 
             //  グラフエリアのマージンを求める
             ydraw.setScreenTextSize(mTextSize);
             double leftMargine   = 0;
             double bottomMargine = 0;
-            double righMargine = Math.Abs(30 / ydraw.world2screenXlength(1));
+            double rightMargine = Math.Abs(30 / ydraw.world2screenXlength(1));
             double topMargine  = Math.Abs(30 / ydraw.world2screenYlength(1));
             int scaleFormatType = mArea.Height > 100 ? 0 : (mArea.Height > 1 ? 1 : 2);
 
-            //  縦軸の目盛り文字列の最大幅を求める
+            //  縦軸の目盛り文字列の最大幅を求める(leftMargine)
             for (double y = mArea.Y; y <= mArea.Y + mArea.Height; y += mStepYsize) {
                 Size size = ydraw.measureText(y.ToString(mScaleFormat[scaleFormatType]));
                 leftMargine = Math.Max(leftMargine, size.Width);
             }
-            //  横軸の目盛り文字列の最大幅を求める
+            leftMargine += rightMargine;
+            //  横軸の目盛り文字列の最大幅を求める(bottomMargine)
             for (double x = mArea.X; x <= mArea.X + mArea.Width; x += mStepXsize) {
-                if (mDataType != SheetData.DATATYPE.STRING || x < mSheetData.getDataSize()) {
-                    Size size = ydraw.measureText(YTitle2String(x, mDataType));
+                if (mDoubleList.mDataType != SheetData.DATATYPE.STRING || x < mSheetData.getDataSize()) {
+                    Size size = ydraw.measureText(YTitle2String(x, mDoubleList.mDataType));
                     bottomMargine = Math.Max(bottomMargine, size.Width);
                 }
             }
-            leftMargine += righMargine;
             bottomMargine = Math.Abs(ydraw.screen2worldYlength(ydraw.world2screenXlength(bottomMargine)));
             bottomMargine += topMargine;
 
-            //  、
-            mBarWidth = 0;
-            if (mGraphType == GRAPHTYPE.BAR_GRAPH || mGraphType == GRAPHTYPE.STACKEDBAR_GRAPH) {
-                mBarWidth = mArea.Width / (mDoubleList.mData[mEndPos][0] - mDoubleList.mData[mStartPos][0] + 1);
-                if (mDataSubType == SheetData.DATATYPE.WEEK)
-                    mBarWidth *= 7;
-                else if (mDataSubType == SheetData.DATATYPE.MONTH)
-                    mBarWidth *= 30;
-                else if (mDataSubType == SheetData.DATATYPE.YEAR)
-                    mBarWidth *= 365;
-                righMargine -= mBarWidth / 2;
-            }
+            //  棒グラフのバー幅
+            mBarWidth = mDoubleList.getMinmumRowDistance();
 
             //  グラフエリアの設定
-            ydraw.setWorldWindow(mArea.X - leftMargine - mBarWidth / 2, mArea.Y + mArea.Height + topMargine,
-                mArea.X + mArea.Width + righMargine, mArea.Y - bottomMargine);
+            ydraw.setWorldWindow(
+                mArea.X - leftMargine, mArea.Y + mArea.Height + topMargine,
+                mArea.X + mArea.Width + rightMargine, mArea.Y - bottomMargine);
         }
 
         /// <summary>
@@ -694,30 +676,39 @@ namespace CalcApp
             ydraw.setColor(Brushes.Gray);
             for (double y = mArea.Y; y <= mArea.Y + mArea.Height; y += mStepYsize) {
                 //  補助線
-                ydraw.drawLine(mArea.X - mBarWidth / 2, y, mArea.X + mArea.Width - mBarWidth / 2, y);
+                ydraw.drawLine(mArea.X, y, mArea.X + mArea.Width, y);
                 //  目盛
-                ydraw.drawText(y.ToString(mScaleFormat[scaleFormatType]), new Point(mArea.X - mBarWidth / 2, y), 0, 
+                ydraw.drawText(y.ToString(mScaleFormat[scaleFormatType]), 
+                    new Point(mArea.X, y), 0, 
                     HorizontalAlignment.Right, VerticalAlignment.Center);
             }
+
             //  横軸軸の目盛りと補助線の表示
             ydraw.setColor(Brushes.Aqua);
-            double textMargine = Math.Abs(3 / ydraw.world2screenYlength(1));
-            for (double x = mArea.X; x <= mArea.X + mArea.Width - mBarWidth / 2; x++) {
-                //  指定ステップで補助線表示
-                if ((x - mArea.X) % mStepXsize ==  0)
+            double textMargine = Math.Abs(3 / ydraw.world2screenYlength(1));            //  目盛上マージン
+            double textDistance = Math.Abs(mTextSize / ydraw.world2screenXlength(1));   //  目盛最低間隔(距離)
+            double axisLine = mDoubleList.mData[mStartPos][0];                          //  補助線位置
+            for (int i = mStartPos; i <= mEndPos; i++) {
+                double x = mDoubleList.mData[i][0];
+                //  補助線表示
+                if (axisLine <= x || i == mEndPos)
                     ydraw.drawLine(x, mArea.Y, x, mArea.Y + mArea.Height);
                 //  目盛表示
-                if ((x - mArea.X) % mStepXsize == 0 ||                                          //  指定ステップ
-                    (mArea.X + mArea.Width - mBarWidth / 2) <= x + 1 ||                         //  最終位置
-                    (mDataType == SheetData.DATATYPE.STRING && x < mSheetData.getDataSize()) || //  目盛種別が文字
-                    mDataType == SheetData.DATATYPE.WEEKDAY)                                    //  目盛種別が曜日
-                    ydraw.drawText(YTitle2String(x, mDataType), new Point(x, mArea.Y - textMargine),
-                        -Math.PI/2, HorizontalAlignment.Left, VerticalAlignment.Center);
+                if (axisLine <= x && textDistance < mDoubleList.mData[mEndPos][0] - x   //  指定ステップ
+                    || i == mEndPos                                                     //  最終位置
+                    || (mDoubleList.mDataType == SheetData.DATATYPE.STRING && x < mSheetData.getDataSize()) //  目盛種別が文字
+                    //|| mDoubleList.mDataType == SheetData.DATATYPE.WEEKDAY                                //  目盛種別が曜日
+                    )
+                    ydraw.drawText(YTitle2String(x, mDoubleList.mDataType), new Point(x, mArea.Y - textMargine),
+                        -Math.PI / 2, HorizontalAlignment.Left, VerticalAlignment.Center);
+                if (axisLine <= x)
+                    axisLine += mStepXsize;
             }
+
             //  グラフ枠の表示
             ydraw.setColor(Brushes.Black);
             ydraw.setFillColor(null);
-            ydraw.drawRectangle(mArea.X - mBarWidth / 2, mArea.Y + mArea.Height, mArea.Width, mArea.Height, 0);
+            ydraw.drawRectangle(mArea.X, mArea.Y + mArea.Height, mArea.Width, mArea.Height, 0);
         }
 
         /// <summary>
@@ -734,7 +725,7 @@ namespace CalcApp
             else if (type == SheetData.DATATYPE.WEEKDAY)
                 xTitle = mYlib.getWeekday((int)x, 2);
             else if (type == SheetData.DATATYPE.STRING)
-                xTitle = mSheetData.getData((int)x)[0];
+                xTitle = mDoubleList.mRowTitle[(int)x];
             else
                 xTitle = x.ToString();
             return xTitle;
@@ -748,16 +739,16 @@ namespace CalcApp
             if (mLegendItems == null || mLegendItems.Count < 1)
                 return;
             Rect rect = new Rect();
-            rect.X = mArea.X + Math.Abs(30 / ydraw.world2screenXlength(1));
+            rect.X = mArea.X + Math.Abs(mTextSize / ydraw.world2screenXlength(1));
             rect.Y = mArea.Y + mArea.Height - Math.Abs(10 / ydraw.world2screenYlength(1));
             rect.Width = Math.Abs(10 / ydraw.world2screenXlength(1));
             rect.Height = Math.Abs(10 / ydraw.world2screenYlength(1));
 
-            for (int i = mDataTitle.Length - 1; 0 < i ; i--) {
+            for (int i = mDoubleList.mDataTitle.Length - 1; 0 < i ; i--) {
                 if (mLegendItems[i - 1].Checked) {
                     ydraw.setFillColor(mDoubleList.mColor[i]);
                     ydraw.drawRectangle(rect, 0);
-                    string title = mDataTitle[i];
+                    string title = mDoubleList.mDataTitle[i];
                     if (1 != mDoubleList.mScale[i])
                         title += "(" + mDoubleList.mScale[i] + "培値)";
                     ydraw.drawText(title, rect.Right + Math.Abs(2 / ydraw.world2screenXlength(1)),
