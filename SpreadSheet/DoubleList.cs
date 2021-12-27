@@ -8,14 +8,26 @@ namespace CalcApp
 {
     /// <summary>
     /// 数値配列リスト(List<string[]>)の処理クラス</string>
+    /// 機能
+    /// 1) 指定列のデータをスケール倍する
+    /// 2) 累積値→増分値(内部保存)
+    /// 3) 増分値→累積値(内部保存)
+    /// 4) 移動平均データ(内部保存)
+    /// 5) 表データの領域(最小最大値)を求める
+    /// 6) 行間の最小値を求める
+    /// 7) 行と列の入れ替え
     /// </summary>
     class DoubleList
     {
-        public List<double[]> mData;                //  実数データ配列リスト
-        public List<bool> mDisp = new List<bool>(); //  列単位の有効フラグリスト
-        public List<Brush> mColor = new List<Brush>();
+        public List<double[]> mData;                        //  実数データ配列リスト
+        public List<bool> mDisp = new List<bool>();         //  列単位の表示有効フラグリスト
+        public string[] mDataTitle;                         //  データの種類名(凡例)
+        public string[] mRowTitle;                          //  行タイトル
+        public SheetData.DATATYPE mDataType;                //  列のデータタイプ
+        public SheetData.DATATYPE mDataSubType;             //  列のデータタイプ
+        public List<Brush> mColor = new List<Brush>();      //  列のカラーコード
         public List<double> mScale = new List<double>();    //  項目データのスケール値
-        public Rect mArea = new Rect();             //  配列リストの領域(最大最小値
+        public Rect mArea = new Rect();                     //  配列リストの領域(最大最小値
 
         private YDrawingShapes ydraw = new YDrawingShapes();
 
@@ -35,26 +47,25 @@ namespace CalcApp
         /// <param name="data"></param>
         public DoubleList(DoubleList data)
         {
-            mData = new List<double[]>(data.mData);
-            mDisp = new List<bool>(data.mDisp);
-            mColor = new List<Brush>(data.mColor);
-            mScale = new List<double>(data.mScale);
-            mArea = new Rect(data.mArea.X, data.mArea.Y, data.mArea.Width, data.mArea.Height);
+            setData(data);
         }
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
         /// <param name="data">数値データ</param>
+        /// <param name="dataTitle">列タイトル</param>
+        /// <param name="rowTitle">行タイトル</param>
+        /// <param name="dataType">行タイトルのデータ種別</param>
+        /// <param name="dataSubType">行タイトルのデータサブ種別</param>
         /// <param name="disp">表示可否リスト</param>
         /// <param name="color">色リスト</param>
         /// <param name="scale">スケールリスト</param>
-        public DoubleList(List<double[]> data, List<bool> disp, List<Brush> color, List<double> scale)
+        public DoubleList(List<double[]> data, string[] dataTitle, string[] rowTitle,
+            SheetData.DATATYPE dataType, SheetData.DATATYPE dataSubType,
+            List<bool> disp, List<Brush> color, List<double> scale)
         {
-            mData = new List<double[]>(data);
-            mDisp = new List<bool>(disp);
-            mColor = new List<Brush>(color);
-            mScale = new List<double>(scale);
+            setData(data, dataTitle, rowTitle, dataType, dataSubType, disp, color, scale);
         }
 
         /// <summary>
@@ -77,17 +88,52 @@ namespace CalcApp
         /// <returns>コピーデータ</returns>
         public DoubleList fromCopy()
         {
-            DoubleList doubleList = new DoubleList(mData, mDisp, mColor, mScale);
+            DoubleList doubleList = new DoubleList(mData, mDataTitle, mRowTitle,
+                mDataType,mDataSubType, mDisp, mColor, mScale);
             return doubleList;
         }
 
         /// <summary>
         /// データを複製して設定する
         /// </summary>
-        /// <param name="data">数値配列リスト</param>
-        public void setData(List<double[]> data, List<bool> disp, List<Brush> color, List<double> scale)
+        /// <param name="data">数値配列データ</param>
+        public void setData(DoubleList data)
+        {
+            mData = new List<double[]>(data.mData);
+            mDataTitle = new string[data.mDataTitle.Length];
+            Array.Copy(data.mDataTitle, mDataTitle, data.mDataTitle.Length);
+            mRowTitle = new string[data.mRowTitle.Length];
+            Array.Copy(data.mRowTitle, mRowTitle, data.mRowTitle.Length);
+            mDataType = data.mDataType;
+            mDataSubType = data.mDataSubType;
+            mDisp = new List<bool>(data.mDisp);
+            mColor = new List<Brush>(data.mColor);
+            mScale = new List<double>(data.mScale);
+            mArea = new Rect(data.mArea.X, data.mArea.Y, data.mArea.Width, data.mArea.Height);
+        }
+
+        /// <summary>
+        /// データを複製して設定する
+        /// </summary>
+        /// <param name="data">数値データ</param>
+        /// <param name="dataTitle">列タイトル</param>
+        /// <param name="rowTitle">行タイトル</param>
+        /// <param name="dataType">行タイトルのデータ種別</param>
+        /// <param name="dataSubType">行タイトルのデータサブ種別</param>
+        /// <param name="disp">表示可否リスト</param>
+        /// <param name="color">色リスト</param>
+        /// <param name="scale">スケールリスト</param>
+        public void setData(List<double[]> data, string[] dataTitle, string[] rowTitle,
+            SheetData.DATATYPE dataType, SheetData.DATATYPE dataSubType,
+            List<bool> disp, List<Brush> color, List<double> scale)
         {
             mData = new List<double[]>(data);
+            mDataTitle = new string[dataTitle.Length];
+            Array.Copy(dataTitle, mDataTitle, dataTitle.Length);
+            mRowTitle = new string[rowTitle.Length];
+            Array.Copy(rowTitle, mRowTitle, rowTitle.Length);
+            mDataType = dataType;
+            mDataSubType = dataSubType;
             mDisp = new List<bool>(disp);
             mColor = new List<Brush>(color);
             mScale = new List<double>(scale);
@@ -120,7 +166,7 @@ namespace CalcApp
         }
 
         /// <summary>
-        /// 累積値→増分値(内部保存して返す)
+        /// 累積値→増分値(内部保存)
         /// </summary>
         /// <param name="sc">対象開始列</param>
         /// <param name="ec">対象終了列</param>
@@ -144,7 +190,7 @@ namespace CalcApp
         }
 
         /// <summary>
-        /// 増分値→累積値(内部保存して返す)
+        /// 増分値→累積値(内部保存)
         /// </summary>
         /// <param name="sc">対象開始列</param>
         /// <param name="ec">対象終了列</param>
@@ -168,7 +214,7 @@ namespace CalcApp
         }
 
         /// <summary>
-        /// 移動平均データ(内部保存して返す)
+        /// 移動平均データ(内部保存)
         /// </summary>
         /// <param name="aveSize">移動平均のデータサイズ</param>
         /// <param name="sc">対象開始列</param>
@@ -189,42 +235,93 @@ namespace CalcApp
         }
 
         /// <summary>
+        /// 一行の移動平均データを求める
+        /// </summary>
+        /// <param name="srcData">数値データ配列</param>
+        /// <param name="averageSize">移動平均のデータサイズ</param>
+        /// <returns>変換後の数値データ配列</returns>
+        public double[] movingAverage(double[] srcData, int averageSize = 7)
+        {
+            double[] destData = new double[srcData.Length];
+            int sp = -averageSize / 2;
+            int ep = averageSize + sp;
+            for (int i = 0; i < srcData.Length; i++) {
+                destData[i] = 0.0;
+                for (int j = Math.Max(0, i + sp); j < Math.Min(srcData.Length, i + ep); j++)
+                    destData[i] += srcData[j];
+            }
+            return destData;
+        }
+
+        /// <summary>
         /// 表データの領域(最小最大値)を求める
         /// X:列,Y:行
         /// </summary>
         /// <param name="stack">積上げ式データ</param>
-        /// <param name="sr">開始行</param>
-        /// <param name="er">終了行</param>
-        /// <param name="sc">開始列(省略時1列目)</param>
-        /// <param name="ec">終了列</param>
+        /// <param name="bar">棒グラフ</param>
+        /// <param name="startRow">開始行</param>
+        /// <param name="endRow">終了行</param>
+        /// <param name="starCol">開始列(省略時1列目)</param>
+        /// <param name="endCol">終了列</param>
         /// <returns>領域</returns>
-        public Rect getArea(bool stack = false, int sr = 0, int er = -1, int sc = 1, int ec = -1)
+        public Rect getArea(bool stack = false, bool bar = false, 
+            int startRow = 0, int endRow = -1, int starCol = 1, int endCol = -1)
         {
-            er = er < 0 ? mData.Count : er + 1;
-            ec = ec < 0 ? mData[0].Length : ec + 1;
+            endRow = endRow < 0 ? mData.Count : endRow + 1;
+            endCol = endCol < 0 ? mData[0].Length : endCol + 1;
             Rect area = new Rect();
-            area.Y = mData[sr][0];
-            area.X = mData[sr][sc];
-            area.Height = 0.0;
+            area.Y = mData[startRow][0];
+            area.X = mData[startRow][starCol];
             area.Width = 0.0;
-            for (int i = sr; i < er; i++) {
+            double minX = mData[startRow][mDisp.IndexOf(true, starCol)];
+            double maxX = minX; 
+            for (int i = startRow; i < endRow; i++) {
                 area.Y = Math.Min(area.Y, mData[i][0]);
-                area.Height= Math.Max(area.Height, mData[i][0] - area.Y);
+                area.Height = Math.Max(area.Height, mData[i][0] - area.Y);
                 double total = 0.0;
-                for (int j = sc; j < ec; j++) {
+                for (int j = starCol; j < endCol; j++) {
                     if (mDisp[j]) {
                         area.X = Math.Min(area.X, mData[i][j]);
                         if (stack) {
                             total += mData[i][j];
                         } else {
-                            area.Width = Math.Max(area.Width, mData[i][j] - area.X);
+                            minX = Math.Min(minX, mData[i][j]);
+                            maxX = Math.Max(maxX, mData[i][j]);
                         }
                     }
                 }
-                if (stack)
-                    area.Width = Math.Max(area.Width, total - area.X);
+                if (stack) {
+                    minX = Math.Min(minX, total);
+                    maxX = Math.Max(maxX, total);
+                }
+            }
+            area.X = minX;
+            area.Width = maxX - minX;
+            if (bar) {
+                double barWidth = getMinmumRowDistance();
+                area.Y -= barWidth / 2.0;
+                area.Height += barWidth;
             }
             return area;
+        }
+
+        /// <summary>
+        /// 行間の最小値を求める
+        /// </summary>
+        /// <returns>行間</returns>
+        public double getMinmumRowDistance()
+        {
+            double minDis = 0.0;
+            for (int i = 0; i < mData.Count - 1; i++) {
+                double dis = mData[i + 1][0] - mData[i][0];
+                if (0.0 < dis) {
+                    if (0.0 < minDis)
+                        minDis = Math.Min(dis, minDis);
+                    else
+                        minDis = dis;
+                }
+            }
+            return minDis;
         }
 
         /// <summary>
@@ -243,25 +340,6 @@ namespace CalcApp
                 doubleData.Add(dest);
             }
             return doubleData;
-        }
-
-        /// <summary>
-        /// 移動平均データを求める
-        /// </summary>
-        /// <param name="srcData">数値データ配列</param>
-        /// <param name="averageSize">移動平均のデータサイズ</param>
-        /// <returns>変換後の数値データ配列</returns>
-        public double[] movingAverage(double[] srcData, int averageSize = 7)
-        {
-            double[] destData = new double[srcData.Length];
-            int sp = -averageSize / 2;
-            int ep = averageSize + sp;
-            for (int i= 0; i < srcData.Length; i++) {
-                destData[i] = 0.0;
-                for (int j = Math.Max(0, i + sp); j < Math.Min(srcData.Length, i + ep); j++)
-                    destData[i] += srcData[j];
-            }
-            return destData;
         }
     }
 }
