@@ -534,7 +534,11 @@ namespace CalcApp
         /// </summary>
         private void convDoubleData()
         {
-            SheetData doubleData = mData.DoublDataTable();
+            int m = CbComboYList.SelectedIndex;         //  集計系列(縦軸)  開始列
+            int n = CbComboXList.SelectedIndex;         //  集計項目(横軸)  終了列
+            if (n < m)
+                YLib.Swap(ref m, ref n);
+            SheetData doubleData = mData.DoublDataTable(m, n);
             if (doubleData != null) {
                 mDataList.Add(doubleData);              //  変換したデータを履歴に登録
                 setDataDisp(mDataList[mDataList.Count - 1]);
