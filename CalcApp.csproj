@@ -224,7 +224,7 @@
     <Resource Include="FuncPlot\SampleFunction.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="GLGraph\Smaple3DFunction.txt" />
+    <Resource Include="GLGraph\Sample3DFunction.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
