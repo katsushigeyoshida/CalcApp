@@ -12,7 +12,6 @@ namespace CalcApp
 
         private List<string[]> mData;       //  ファイルデータ
         private string[] mDataTitle;        //  ファイルデータのタイトル
-        private bool[] mDataTitleUse;       //  タイトル列の有効の有無
         private DATATYPE[] mDataType;       //  データタイプ
         private DATATYPE[] mDataSubType;    //  データサブタイプ
         private List<double[]> mDoubleData; //  数値データ(0列めは縦軸データ)
@@ -37,7 +36,6 @@ namespace CalcApp
         {
             mData = data;                                   //  データリスト
             mDataTitle = setTitle(title);                   //  タイトル行
-            mDataTitleUse = new bool[mDataTitle.Length];    //  データ列の使用有無
             mDataType = new DATATYPE[mDataTitle.Length];    //  列のデータタイプ
             mDataSubType = new DATATYPE[mDataTitle.Length]; //  列の詳細データタイプ
             //  初期値設定
@@ -45,8 +43,6 @@ namespace CalcApp
                 mDataSubType[i] = getDataType(mData, i);
                 mDataType[i] = (mDataSubType[i] == DATATYPE.WEEK || mDataSubType[i] == DATATYPE.MONTH
                     || mDataSubType[i] == DATATYPE.YEAR) ? DATATYPE.DATE : mDataSubType[i];
-                mDataTitleUse[i] = true;
-                //mDataScale[i] = 1.0;
             }
             stringTable2doubleTable();
             dataCheck();                                    //  データを行単位でサイズチェック
@@ -125,7 +121,6 @@ namespace CalcApp
             SheetData destData = new SheetData();
             destData.mData = mData;
             destData.mDataTitle = mDataTitle;
-            destData.mDataTitleUse = mDataTitleUse;
             //destData.mDataScale = mDataScale;
             destData.mDataType = mDataType;
             destData.mDataSubType = mDataSubType;
@@ -149,10 +144,6 @@ namespace CalcApp
             }
             destData.mDataTitle = new string[mDataTitle.Length];
             Array.Copy(mDataTitle, destData.mDataTitle, mDataTitle.Length);
-            destData.mDataTitleUse = new bool[mDataTitle.Length];
-            Array.Copy(mDataTitleUse, destData.mDataTitleUse, mDataTitle.Length);
-            //destData.mDataScale = new double[mDataTitle.Length];
-            //Array.Copy(mDataScale, destData.mDataScale, mDataTitle.Length);
             destData.mDataType = new DATATYPE[mDataType.Length];
             Array.Copy(mDataType, destData.mDataType, mDataType.Length);
             destData.mDataSubType = new DATATYPE[mDataSubType.Length];
@@ -210,16 +201,6 @@ namespace CalcApp
         }
 
         /// <summary>
-        /// 指定行の列数を取得
-        /// </summary>
-        /// <param name="n">行位置</param>
-        /// <returns>列数</returns>
-        private int getColumnSize(int n)
-        {
-            return mData[n].Length;
-        }
-
-        /// <summary>
         /// データ行で最大の列数を求める
         /// </summary>
         /// <returns>列数</returns>
@@ -269,19 +250,6 @@ namespace CalcApp
         }
 
         /// <summary>
-        /// 列タイトルの取得
-        /// </summary>
-        /// <param name="n"></param>
-        /// <returns></returns>
-        public string getTitle(int n)
-        {
-            if (0 <= n && n < mDataTitle.Length)
-                return mDataTitle[n];
-            else
-                return "";
-        }
-
-        /// <summary>
         /// 指定列のデータを取得する
         /// </summary>
         /// <param name="col">対象列</param>
@@ -293,46 +261,6 @@ namespace CalcApp
                 rowData[i] = mData[i][col];
             return rowData;
         }
-
-        /// <summary>
-        /// タイトル列の有効の有無を取得
-        /// </summary>
-        /// <param name="n"></param>
-        /// <returns></returns>
-        public bool getDataTitleUse(int n)
-        {
-            return mDataTitleUse[n];
-        }
-
-        /// <summary>
-        /// タイトル列の有効の有無を設定
-        /// </summary>
-        /// <param name="n"></param>
-        /// <param name="use"></param>
-        public void setDataTitleUse(int n, bool use)
-        {
-            mDataTitleUse[n] = use;
-        }
-
-        /// <summary>
-        /// 項目のスケール値を取得
-        /// </summary>
-        /// <param name="n"></param>
-        /// <returns></returns>
-        //public double getDataScale(int n)
-        //{
-        //    return mDataScale[n];
-        //}
-
-        /// <summary>
-        /// 項目のスケール値を設定
-        /// </summary>
-        /// <param name="n"></param>
-        /// <param name="scale"></param>
-        //public void setDataScale(int n, double scale)
-        //{
-        //    mDataScale[n] = scale;
-        //}
 
         /// <summary>
         /// データの種別の取得
@@ -624,10 +552,18 @@ namespace CalcApp
         /// データテーブルを一度数値データに変換してからテキストデータシートとして取得
         /// </summary>
         /// <returns>テーブルデータ</returns>
-        public SheetData DoublDataTable()
+        public SheetData DoublDataTable(int scol = 0, int ecol = -1)
         {
-            stringTable2doubleTable();
-            SheetData sheetData = new SheetData(doubleData2String(), mDataTitle);
+            ecol = ecol < 0 ? mData[0].Length : ecol;
+            SheetData sheetData;
+            if (scol == 0 && ecol == mData[0].Length) {
+                //  全列変換
+                stringTable2doubleTable();
+                sheetData = new SheetData(doubleData2String(), mDataTitle);
+            } else {
+                //  指定列変換
+                sheetData = new SheetData(stringData2DoubleData(scol, ecol), mDataTitle);
+            }
             return sheetData;
 
         }
@@ -1837,6 +1773,30 @@ namespace CalcApp
         }
 
         /// <summary>
+        /// 指定列を文字列データから数値文字列データに変換する
+        /// </summary>
+        /// <param name="scol">開始列</param>
+        /// <param name="ecol">終了列</param>
+        /// <returns>変換後データ</returns>
+        private List<string[]> stringData2DoubleData(int scol, int ecol)
+        {
+            List<string[]> stringDatas = new List<string[]>();
+            for (int row = 0; row < mData.Count; row++) {
+                string[] data = new string[mData[row].Length];
+                for (int col = 0; col < mData[row].Length;col++) {
+                    if (scol <= col && col <= ecol) {
+                        data[col] = double2String(string2Double(mData[row][col], row, mDataType[col]), mDataType[col]);
+                    } else {
+                        data[col] = mData[row][col];
+                    }
+                }
+                stringDatas.Add(data);
+            }
+            return stringDatas;
+        }
+
+
+        /// <summary>
         /// 数値データテーブルをテキストデータテーブルに変換する
         /// </summary>
         /// <returns></returns>
@@ -1888,24 +1848,15 @@ namespace CalcApp
         /// テキストデータ配列を数値データ配列に変換する
         /// 文字データは行番号に置き換える
         /// </summary>
+        /// <param name="row">行番号</param>
         /// <param name="stringArray">テキストデータ配列</param>
         /// <param name="dateType">データタイプ配列</param>
         /// <returns>数値データ配列</returns>
-        private double[] stringArray2doubleArray(int n, string[] stringArray, DATATYPE[] dataType)
+        private double[] stringArray2doubleArray(int row, string[] stringArray, DATATYPE[] dataType)
         {
             double[] doubleArray = new double[stringArray.Length];
             for (int i = 0; i < stringArray.Length; i++) {
-                if (dataType[i] == DATATYPE.DATE) {
-                    doubleArray[i] = ylib.date2JulianDay(stringArray[i]);
-                } else if (dataType[i] == DATATYPE.WEEKDAY) {
-                    doubleArray[i] = ylib.WeekNo(stringArray[i]);
-                } else if (dataType[i] == DATATYPE.TIME) {
-                    doubleArray[i] = ylib.time2Seconds(stringArray[i]);
-                } else if (dataType[i] == DATATYPE.STRING) {
-                    doubleArray[i] = n;                         //  文字データは行番号にする
-                } else {
-                    doubleArray[i] = ylib.string2double(stringArray[i]);
-                }
+                doubleArray[i] = string2Double(stringArray[i], row, dataType[i]);
             }
             return doubleArray;
         }
@@ -1920,18 +1871,55 @@ namespace CalcApp
         {
             string[] stringArray = new string[doubleArray.Length];
             for (int i = 0; i < doubleArray.Length; i++) {
-                if (dataType[i] == DATATYPE.DATE) {
-                    stringArray[i] = ylib.JulianDay2DateYear((int)doubleArray[i], true);
-                } else if (dataType[i] == DATATYPE.TIME) {
-                    stringArray[i] = ylib.second2String((int)doubleArray[i], false);
-                } else {
-                    if (doubleArray[i] % 1 == 0)
-                        stringArray[i] = doubleArray[i].ToString("#,##0");
-                    else
-                        stringArray[i] = doubleArray[i].ToString();
-                }
+                stringArray[i] = double2String(doubleArray[i], dataType[i]);
             }
             return stringArray;
+        }
+
+        /// <summary>
+        /// 文字列のタイプにあわせて文字列を数値に変換
+        /// </summary>
+        /// <param name="stringData">文字列データ</param>
+        /// <param name="row">対象行</param>
+        /// <param name="dataType">文字列の種類</param>
+        /// <returns>変換後の数値</returns>
+        private double string2Double(string stringData, int row, DATATYPE dataType)
+        {
+            double doubleData;
+            if (dataType == DATATYPE.DATE) {
+                doubleData = ylib.date2JulianDay(stringData);
+            } else if (dataType == DATATYPE.WEEKDAY) {
+                doubleData = ylib.WeekNo(stringData);
+            } else if (dataType == DATATYPE.TIME) {
+                doubleData = ylib.time2Seconds(stringData);
+            } else if (dataType == DATATYPE.STRING) {
+                doubleData = row;                         //  文字データは行番号にする
+            } else {
+                doubleData = ylib.string2double(stringData);
+            }
+            return doubleData;
+        }
+
+        /// <summary>
+        /// 数値を文字列タイプに合わせて文字列に変換
+        /// </summary>
+        /// <param name="doubleData">数値データ</param>
+        /// <param name="dataType">文字列タイプ</param>
+        /// <returns>文字列</returns>
+        private string double2String(double doubleData, DATATYPE dataType)
+        {
+            string stringData;
+            if (dataType == DATATYPE.DATE) {
+                stringData = ylib.JulianDay2DateYear((int)doubleData, true);
+            } else if (dataType == DATATYPE.TIME) {
+                stringData = ylib.second2String((int)doubleData, false);
+            } else {
+                if (doubleData % 1 == 0)
+                    stringData = doubleData.ToString("#,##0");
+                else
+                    stringData = doubleData.ToString();
+            }
+            return stringData;
         }
 
         /// <summary>
@@ -1950,7 +1938,7 @@ namespace CalcApp
 
             Rect area = getMinMaxPoint(doubleTable[startPos]);
             for (int i = startPos + 1; i <= endPos; i++) {
-                    area = getMinMaxPoint(doubleTable[i], area);
+                area = getMinMaxPoint(doubleTable[i], area);
             }
             return area;
         }
@@ -1968,18 +1956,12 @@ namespace CalcApp
             minmax.Height = 0;
             //  横軸最小値
             minmax.X = Math.Min(doubleArray[1], 0);
-            for (int i = 1; i < doubleArray.Length; i++)
-                if (mDataTitleUse[i]) {
-                    minmax.X = doubleArray[i];
-                    break;
-                }
+            minmax.X = doubleArray[1];
             //  横軸最大値
             double max = minmax.X;
             for (int i = 1; i < doubleArray.Length; i++) {
-                if (mDataTitleUse[i]) {
-                    minmax.X = Math.Min(doubleArray[i], minmax.X);
-                    max = Math.Max(doubleArray[i], max);
-                }
+                minmax.X = Math.Min(doubleArray[i], minmax.X);
+                max = Math.Max(doubleArray[i], max);
             }
             minmax.Width = max - minmax.X;
             return minmax;
@@ -1999,10 +1981,8 @@ namespace CalcApp
             //  横軸の最小最大値更新
             double max = minmax.X + minmax.Width;
             for (int i = 1; i < doubleArray.Length; i++) {
-                if (mDataTitleUse[i]) {
-                    minmax.X = Math.Min(doubleArray[i], minmax.X);
-                    max = Math.Max(doubleArray[i], max);
-                }
+                minmax.X = Math.Min(doubleArray[i], minmax.X);
+                max = Math.Max(doubleArray[i], max);
             }
             minmax.Width = max - minmax.X;
             return minmax;
