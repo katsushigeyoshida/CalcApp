@@ -59,7 +59,7 @@
             <Button Content="グラフ化" Name="BtGraph" Click="BtGraph_Click" />
             <Button Content="CSV出力" Name="BtCsvOut" Click="BtCsvOut_Click" />
         </StackPanel>
-        <DataGrid x:Name="DgDataSheet" IsReadOnly="True" Sorting="DataSheet_Sorting" >
+        <DataGrid x:Name="DgDataSheet" IsReadOnly="True" Sorting="DataSheet_Sorting" MouseDoubleClick="DgDataSheet_MouseDoubleClick" >
             <DataGrid.ContextMenu >
                 <ContextMenu>
                     <MenuItem x:Name="SelectCopyMenu" Header="コピー" Click="DataGridMenuClick" />

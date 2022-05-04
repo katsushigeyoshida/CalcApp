@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using WpfLib;
 
 namespace CalcApp
@@ -190,6 +191,7 @@ namespace CalcApp
             mFuncList.Add(new iClassFuc(copyDataColumn,     "指定列間を右端に複写"));
             mFuncList.Add(new iClassFuc(joinDataColumn,     "指定列間の文字結合"));
             mFuncList.Add(new iClassFuc(addDataColumn,      "指定列間の加算結合"));
+            mFuncList.Add(new iClassFuc(renameTitle,        "タイトル名変更"));
             mFuncList.Add(new iClassFuc(fileMerge,          "ファイルマージ"));
             mFuncList.Add(new iClassFuc(dataFilter,         "指定列のデータでフィルタリング"));
             mFuncList.Add(new iClassFuc(dataConvert,         "データの置換え"));
@@ -482,7 +484,7 @@ namespace CalcApp
         }
 
         /// <summary>
-        /// データグリッドのソートカスタマイズ
+        /// [ソート]データグリッドのソートカスタマイズ
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -511,6 +513,32 @@ namespace CalcApp
                 if (column.SortMemberPath == e.Column.SortMemberPath) {
                     column.SortDirection = sortDir;
                 }
+            }
+        }
+
+        /// <summary>
+        /// [セルのダブルクリック]
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DgDataSheet_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (DgDataSheet.SelectedItem != null) {
+                //  選択したセルの行・列No
+                var row = DgDataSheet.SelectedIndex;
+                var col = DgDataSheet.CurrentColumn.DisplayIndex;
+                //MessageBox.Show("" + row + " " + col + " " + mData.getData()[row][col]);
+                //  選択したセル内容の変更
+                InputBox dlg = new InputBox();
+                dlg.mEditText = mData.getData()[row][col];
+                if (dlg.ShowDialog() == true) {
+                    SheetData newData = mData.changeCellData(row, col, dlg.mEditText);
+                    if (newData != null) {
+                        mDataList.Add(newData);                 //  変換したデータを履歴に登録
+                        setDataDisp(mDataList[mDataList.Count - 1]);
+                    }
+                }
+
             }
         }
 
@@ -1048,9 +1076,26 @@ namespace CalcApp
         private bool fileMerge(string path, int titleCol = -1)
         {
             if (0 < path.Length) {
+                setEncodeType(CbEncode.Text);
                 SheetData sheetData = loadDataFile(path);
                 if (sheetData != null) {
-                    SheetData mergeData = mData.MergeData(sheetData, titleCol);
+                    (int srcCol, int destCol) = mData.titleSearch(sheetData, titleCol);
+                    if (srcCol < 0) {
+                        MessageBox.Show(mData.getErrorMessage(), "共通タイトルが見つかりませんでした");
+                        return false;
+                    } else if (destCol < 0) {
+                        SelectMenu selMenu = new SelectMenu();
+                        selMenu.Title = "共有タイトルの選択";
+                        string[] menuList = sheetData.getTitle().InsertTop("");
+                        selMenu.mMenuList = menuList;
+                        if (selMenu.ShowDialog() == true) {
+                            destCol = Array.IndexOf(menuList, selMenu.mSelectItem) - 1;
+                        } else {
+                            return false;
+                        }
+                    }
+
+                    SheetData mergeData = mData.MergeData(sheetData, titleCol, destCol);
                     if (mergeData != null) {
                         mDataList.Add(mergeData);              //  変換したデータを履歴に登録
                         setDataDisp(mDataList[mDataList.Count - 1]);
@@ -1137,6 +1182,26 @@ namespace CalcApp
                 }
             }
         }
+
+        /// <summary>
+        /// 選択列のタイトルを変更する
+        /// </summary>
+        private void renameTitle()
+        {
+            if (0 < CbComboYList.Text.Length) {
+                int n = CbComboYList.SelectedIndex;
+                InputBox dlg = new InputBox();
+                dlg.mEditText = mData.getTitle()[n];
+                if (dlg.ShowDialog() == true) {
+                    SheetData sheetData = mData.changeTitleData(n, dlg.mEditText);
+                    if (sheetData != null) {
+                        mDataList.Add(sheetData);
+                        setDataDisp(mDataList[mDataList.Count - 1]);
+                    }
+                }
+            }
+        }
+
 
         /// <summary>
         /// 指定列のデータでフィルタリングする
@@ -1272,6 +1337,9 @@ namespace CalcApp
             if (Path.GetExtension(path).ToLower().CompareTo(".csv") == 0) {
                 //  CSV形式
                 dataList = ylib.loadCsvData(path, tabSep);
+            } else if (Path.GetExtension(path).ToLower().CompareTo(".tsv") == 0) {
+                //  TSV形式
+                dataList = ylib.loadCsvData(path, true);
             } else if (Path.GetExtension(path).ToLower().CompareTo(".ndjson") == 0 ||
                 Path.GetExtension(path).ToLower().CompareTo(".json") == 0) {
                 //  JSON形式
@@ -1343,9 +1411,7 @@ namespace CalcApp
         {
             List<string> files = addressData.getFileNames();
             //  エンコード設定
-            mEncordType = Array.IndexOf(mEncodeTitle, addressData.mEncode);
-            mEncordType = mEncordType < 0 ? 0 : mEncordType;
-            ylib.setEncording(mEncordType);
+            setEncodeType(addressData.mEncode);
             bool tabSep = CbTsv.IsChecked == true;  //  TSVデータ
             //  データファイル(csv/ndjson)の読込
             if (0 < files.Count) {
@@ -1358,6 +1424,17 @@ namespace CalcApp
                     MessageBox.Show("ファイルが存在しないか、ダウンロードに失敗したと思われます");
                 }
             }
+        }
+
+        /// <summary>
+        /// ファイル読込時のエンコード設定
+        /// </summary>
+        /// <param name="encode">エンコード</param>
+        private void setEncodeType(string encode)
+        {
+            mEncordType = Array.IndexOf(mEncodeTitle, encode);
+            mEncordType = mEncordType < 0 ? 0 : mEncordType;
+            ylib.setEncording(mEncordType);
         }
 
         /// <summary>
@@ -1397,6 +1474,7 @@ namespace CalcApp
 
             //  ファイルの読み込み
             TbRowInfo.Text = "データ読込中";
+            TbColInfo.Text = "";
             ylib.DoEvents();
             mFileData = loadDataFile(filePath, tabSep);     //  CSV/NDJSONファイルからデータの取り込
             if (mFileData != null) {
@@ -1423,6 +1501,7 @@ namespace CalcApp
                 string downLoadFile = mDownLoadFolder + "\\" + filePath.Substring(filePath.LastIndexOf("/") + 1);
                 if (download || !File.Exists(downLoadFile)) {
                     TbRowInfo.Text = "ダウンロード中";
+                    TbColInfo.Text = "";
                     ylib.DoEvents();
                     if (!ylib.webFileDownload(filePath, downLoadFile)) {
                         MessageBox.Show("ファイルがダウンロードできませんでした\n" + ylib.getErrorMessage(), "エラー");
