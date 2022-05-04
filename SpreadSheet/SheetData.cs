@@ -49,10 +49,11 @@ namespace CalcApp
         }
 
         /// <summary>
-        /// タイトルの設定
+        /// タイトルの設定(タイトルのコピー作成)
+        /// タイトル数がデータの最大列数に合わせる
         /// </summary>
-        /// <param name="title"></param>
-        /// <returns></returns>
+        /// <param name="title">元タイトル</param>
+        /// <returns>コピータイトル</returns>
         private string[] setTitle(string[] title)
         {
             int maxColumn = getMaxColumnSize();
@@ -463,24 +464,37 @@ namespace CalcApp
         public SheetData MergeNextLine(int n, int m)
         {
             List<string[]> data = new List<string[]>();
-            for (int i = 0; i < mData.Count; i++) {
-                if (i == n) {
-                    string[] mergedata = new string[mData[i].Length];
-                    for (int j = 0; j < mData[i].Length; j++) {
-                        mergedata[j] = mData[i][j];
-                    }
-                    for (int k = 0; k < m; k++) {
-                        for (int j = 0; j < mData[i].Length; j++) {
-                            mergedata[j] += (0 < mData[i][j].Length ? " " : "") + mData[i + 1][j];
-                        }
-                        i++;
-                    }
-                    data.Add(mergedata);
-                } else {
+            string[] title = new string[mDataTitle.Length];
+            if (n == 0 && m ==0) {
+                for (int i = 0; i < mDataTitle.Length; i++) {
+                    title[i] = mDataTitle[i] + (0 < mData[0][i].Length ? " " : "") + mData[0][i];
+                }
+                for (int i = 1; i < mData.Count; i++) {
                     data.Add(mData[i]);
                 }
+            } else {
+                for (int i = 0; i < mDataTitle.Length; i++) {
+                    title[i] = mDataTitle[i];
+                }
+                for (int i = 0; i < mData.Count; i++) {
+                    if (i == n) {
+                        string[] mergedata = new string[mData[i].Length];
+                        for (int j = 0; j < mData[i].Length; j++) {
+                            mergedata[j] = mData[i][j];
+                        }
+                        for (int k = 0; k < m; k++) {
+                            for (int j = 0; j < mData[i].Length; j++) {
+                                mergedata[j] += (0 < mData[i][j].Length ? " " : "") + mData[i + 1][j];
+                            }
+                            i++;
+                        }
+                        data.Add(mergedata);
+                    } else {
+                        data.Add(mData[i]);
+                    }
+                }
             }
-            SheetData sheetData = new SheetData(data, mDataTitle);
+            SheetData sheetData = new SheetData(data, title);
             return sheetData;
         }
 
@@ -1187,16 +1201,41 @@ namespace CalcApp
         }
 
         /// <summary>
+        /// ファルマージをおこなうためのタイトル比較
+        /// </summary>
+        /// <param name="sheetData">マージファイルデータ</param>
+        /// <param name="col">キータイトル列(-1の時は共通タイトルを検索)</param>
+        /// <returns>キータイトル列番(既存データ、マージデータ)</returns>
+        public (int srcCol, int desCol ) titleSearch(SheetData sheetData, int col = -1)
+        {
+            if (0 <= col) {
+                for (int i = 0; i < sheetData.mDataTitle.Length; i++) {
+                    if (mDataTitle[col].CompareTo(sheetData.mDataTitle[i]) == 0)
+                        return (col, i);
+                }
+                return (col, -1);
+            } else {
+                for (int i = 0; i < sheetData.mDataTitle.Length; i++) {
+                    for (int j = 0; j < mDataTitle.Length; j++) {
+                        if (mDataTitle[j].CompareTo(sheetData.mDataTitle[i]) == 0)
+                            return (j, i);
+                    }
+                }
+                return (-1, -1);
+            }
+        }
+
+        /// <summary>
         /// 既存のデータに新たなデータをマージする
         /// </summary>
         /// <param name="sheetData">追加するテーブルデータ</param>
         /// <param name="col">キータイトルの列番号</param>
         /// <returns>テーブルデータ</returns>
-        public SheetData MergeData(SheetData sheetData, int col = -1)
+        public SheetData MergeData(SheetData sheetData, int col = -1, int destCol = -1)
         {
-            if (0 <= col) {
-                //  キータイトルを設定
-                sheetData.mDataTitle[0] = mDataTitle[col];
+            if (0 <= col && 0 <= destCol) {
+                //  キータイトルを設定()
+                sheetData.mDataTitle[destCol] = mDataTitle[col];
             }
 
             //  タイトルのマージデータ作成
@@ -1514,6 +1553,66 @@ namespace CalcApp
             SheetData sheet = new SheetData(filteredData, mDataTitle);
             return sheet;
         }
+
+        /// <summary>
+        /// セルのデータを変更する
+        /// </summary>
+        /// <param name="row">行番号</param>
+        /// <param name="col">列番号</param>
+        /// <param name="convText">変更する文字列</param>
+        /// <returns>テーブルデータ</returns>
+        public SheetData changeCellData(int row, int col, string convText)
+        {
+            List<string[]> convData = new List<string[]>();
+            for (int i = 0; i < mData.Count; i++) {
+                string[] data = new string[mDataTitle.Length];
+                for (int j = 0; j < mDataTitle.Length; j++) {
+                    if (i == row && j == col) {
+                        data[j] = convText;
+                    } else if (j < mData[i].Length){
+                        data[j] = mData[i][j];
+                    } else {
+                        data[j] = "";
+                    }
+                }
+                convData.Add(data);
+            }
+            SheetData sheet = new SheetData(convData, mDataTitle);
+            return sheet;
+        }
+
+        /// <summary>
+        /// 指定列のタイトル名を変更する
+        /// </summary>
+        /// <param name="col">列No</param>
+        /// <param name="convText">変更タイトル</param>
+        /// <returns>データテーブル</returns>
+        public SheetData changeTitleData(int col, string convText)
+        {
+            string[] convTitle = new string[mDataTitle.Length];
+            for (int i = 0; i < mDataTitle.Length; i++) {
+                if (i  == col) {
+                    convTitle[i] = convText;
+                } else {
+                    convTitle[i] = mDataTitle[i];
+                }
+            }
+            List<string[]> convData = new List<string[]>();
+            for (int i = 0; i < mData.Count; i++) {
+                string[] data = new string[mDataTitle.Length];
+                for (int j = 0; j < mDataTitle.Length; j++) {
+                    if (j < mData[i].Length) {
+                        data[j] = mData[i][j];
+                    } else {
+                        data[j] = "";
+                    }
+                }
+                convData.Add(data);
+            }
+            SheetData sheet = new SheetData(convData, convTitle);
+            return sheet;
+        }
+
 
         /// <summary>
         /// 辞書データを使ってデータの変換を行う
@@ -1954,6 +2053,8 @@ namespace CalcApp
             //  縦軸の最小最大初期値
             minmax.Y = doubleArray[0];
             minmax.Height = 0;
+            if (doubleArray.Length <= 1)
+                return minmax;
             //  横軸最小値
             minmax.X = Math.Min(doubleArray[1], 0);
             minmax.X = doubleArray[1];

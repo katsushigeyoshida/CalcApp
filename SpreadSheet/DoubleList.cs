@@ -247,8 +247,12 @@ namespace CalcApp
             int ep = averageSize + sp;
             for (int i = 0; i < srcData.Length; i++) {
                 destData[i] = 0.0;
-                for (int j = Math.Max(0, i + sp); j < Math.Min(srcData.Length, i + ep); j++)
+                int count = 0;
+                for (int j = Math.Max(0, i + sp); j < Math.Min(srcData.Length, i + ep); j++) {
                     destData[i] += srcData[j];
+                    count++;
+                }
+                destData[i] /= count;
             }
             return destData;
         }
