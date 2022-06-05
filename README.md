@@ -61,3 +61,13 @@ Web上のデータを読み込んだ状態
 ![表グラフ画像](Image/SpreadGraph.png)
 
 
+
+### ■実行環境
+CalcApp.zipをダウンロードして適当なフォルダに展開し、フォルダ内の CalcApp.exe をダブルクリックして実行します。  
+
+### ■開発環境  
+開発ソフト : Microsoft Visual Studio 2022  
+開発言語　 : C# 4.2 Windows アプリケーション  
+フレームワーク　 :  .NET framework 4.7.2  
+NuGetライブラリ : OpenTK(3.3.2),OpenTK.GLControl(3.1.0)  
+自作ライブラリ  : WpfLib, Wpf3DLib
