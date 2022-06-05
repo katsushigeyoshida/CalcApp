@@ -240,6 +240,7 @@ namespace CalcApp
                     break;
                 case 2:         //  スムージング
                     InputBox dlg = new InputBox();
+                    dlg.mMainWindow = this;
                     dlg.mEditText = "7";
                     var result = dlg.ShowDialog();
                     if (result == true) {
@@ -324,6 +325,7 @@ namespace CalcApp
                 return;
             } else if (menuItem.Name.CompareTo("CmScale") == 0) {
                 InputBox dlg = new InputBox();
+                dlg.mMainWindow = this;
                 dlg.Title = "スケール値の設定";
                 dlg.mEditText = mDoubleList.mScale[selItemNo + 1].ToString();
                 if (dlg.ShowDialog() == true) {

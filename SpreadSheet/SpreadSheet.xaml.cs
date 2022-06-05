@@ -530,6 +530,7 @@ namespace CalcApp
                 //MessageBox.Show("" + row + " " + col + " " + mData.getData()[row][col]);
                 //  選択したセル内容の変更
                 InputBox dlg = new InputBox();
+                dlg.mMainWindow = this;
                 dlg.mEditText = mData.getData()[row][col];
                 if (dlg.ShowDialog() == true) {
                     SheetData newData = mData.changeCellData(row, col, dlg.mEditText);
@@ -1191,6 +1192,7 @@ namespace CalcApp
             if (0 < CbComboYList.Text.Length) {
                 int n = CbComboYList.SelectedIndex;
                 InputBox dlg = new InputBox();
+                dlg.mMainWindow = this;
                 dlg.mEditText = mData.getTitle()[n];
                 if (dlg.ShowDialog() == true) {
                     SheetData sheetData = mData.changeTitleData(n, dlg.mEditText);
