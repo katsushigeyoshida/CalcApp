@@ -1,0 +1,45 @@
+﻿$東京都新型コロナ患者発生情報;#SJIS;#%CSV;C:\Users\k-yos\OneDrive\一時データ\オープンデータ\東京都新型コロナ患者発生情報.csv
+$新型コロナワクチン接種_接種日別接種回数サマリ(デジタル庁);$全国のワクチン接種時系列データ;#UTF8;$$https://info.vrs.digital.go.jp/dashboard;#%CSV;https://data.vrs.digital.go.jp/vaccination/opendata/latest/summary_by_date.csv
+$厚生労働省新型コロナ__新規陽性者数の推移（日別）;$厚生労働省データ;#UTF8;$$https://www.mhlw.go.jp/stf/covid-19/open-data.html;#%CSV;https://covid19.mhlw.go.jp/public/opendata/newly_confirmed_cases_daily.csv
+$厚生労働省新型コロナ__死亡者数（累積）;$厚生労働省データ;#UTF8;$$https://www.mhlw.go.jp/stf/covid-19/open-data.html;#%CSV;https://covid19.mhlw.go.jp/public/opendata/deaths_cumulative_daily.csv
+$日本の超過および仮称死亡数ダッシュボード;#UTF8;$$https://exdeaths-japan.org/graph/weekly;#%CSV;C:\Users\k-yos\Downloads\Observed_202201.csv
+$Data on COVID-19 (coronavirus) by Our World in Data;$オックスフォード大学のOur World Data(新型コロナ(COVID-19)の感染者・死者・検査・ワクチン接種数);#UTF8;$$https://github.com/owid/covid-19-data/tree/master/public/data;#%CSV;https://covid.ourworldindata.org/data/owid-covid-data.csv
+$新型コロナワクチン接種_都道府県別累積接種回数サマリー(デジタル庁);$都道府県別累積接種回数サマリー(ワクチン接種状況ダッシュボード);#SJIS;$$https://info.vrs.digital.go.jp/dashboard;#%CSV;https://data.vrs.digital.go.jp/vaccination/opendata/latest/summary_by_prefecture.csv
+$日本の超過および過少死亡数;$観測地;#UTF8;$$https://exdeaths-japan.org/;#%CSV;C:\Users\k-yos\Downloads\Observed.csv
+$東京都新型コロナ;$都内の最新感染動向;#UTF8;$$https://stopcovid19.metro.tokyo.lg.jp/;#%CSV;https://stopcovid19.metro.tokyo.lg.jp/data/130001_tokyo_covid19_patients.csv
+$新型コロナワクチン接種_都道府県別接種回数詳細(デジタル庁);$都道府県別接種回数詳細(ワクチン接種状況ダッシュボード);#UTF8;$$https://info.vrs.digital.go.jp/dashboard;#%CSV;https://data.vrs.digital.go.jp/vaccination/opendata/latest/prefecture.ndjson
+$新型コロナワクチン接種_都道府県別累積接種回数サマリー;$都道府県別累積接種回数サマリー(ワクチン接種状況ダッシュボード);#SJIS;$$https://cio.go.jp/c19vaccine_dashboard;#%CSV;https://vrs-data.cio.go.jp/vaccination/opendata/latest/summary_by_prefecture.csv
+$新型コロナワクチン接種_接種日別接種回数サマリ;$全国のワクチン接種時系列データ;#UTF8;$$https://cio.go.jp/c19vaccine_dashboard;#%CSV;https://vrs-data.cio.go.jp/vaccination/opendata/latest/summary_by_date.csv
+$厚生労働省_自殺死亡l率（1994～2019）簡易;$人口動態統計に基づく自殺死亡数及び自殺死亡率;#SJIS;$$https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/seikatsuhogo/jisatsu/jinkoudoutai-jisatsusyasu.html;#%CSV;C:\Users\k-yos\OneDrive\一時データ\オープンデータ\自殺死亡率（1994～2019）簡易000748024.csv
+$厚生労働省_自殺死亡数（1994～2019）;$人口動態統計に基づく自殺死亡数及び自殺死亡率;#SJIS;$$https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/seikatsuhogo/jisatsu/jinkoudoutai-jisatsusyasu.html;#%CSV;C:\Users\k-yos\OneDrive\一時データ\オープンデータ\自殺死亡数(1994-2019)詳細000748023.csv
+$厚生労働省新型コロナ__重症者数の推移;$厚生労働省データ;#UTF8;$$https://www.mhlw.go.jp/stf/covid-19/open-data.html;#%CSV;https://covid19.mhlw.go.jp/public/opendata/severe_cases_daily.csv
+$新型コロナワクチン接種_都道府県別接種回数詳細;$都道府県別接種回数詳細(ワクチン接種状況ダッシュボード);#UTF8;$$https://cio.go.jp/c19vaccine_dashboard;#%CSV;https://vrs-data.cio.go.jp/vaccination/opendata/latest/prefecture.ndjson
+$厚生労働省新型コロナ__入院治療等を要する者等推移;$厚生労働省データ;#UTF8;$$https://www.mhlw.go.jp/stf/covid-19/open-data.html;#%CSV;https://covid19.mhlw.go.jp/public/opendata/requiring_inpatient_care_etc_daily.csv
+$65歳以上・二人以上世帯の貯蓄現在高階級別世帯分布;$家計調査報告（貯蓄・負債編）-2020年（令和2年）平均結果-（二人以上の世帯）;#SJIS;$$https://www.soumu.go.jp/menu_news/s-news/01toukei07_01000209.html;#%CSV;C:\Users\k-yos\OneDrive\一時データ\オープンデータ\65歳以上・二人以上世帯の貯蓄現在高階級別世帯分布.csv
+$東京都新型コロナ死亡者情報;#UTF8;#%CSV;C:\Users\k-yos\OneDrive\一時データ\オープンデータ\東京都新型コロナ死亡者情報.csv
+$Google_COVID-19感染予測;#UTF8;$$https://cloud.google.com/blog/ja/products/ai-machine-learning/google-and-harvard-improve-covid-19-forecasts;#%CSV;https://storage.googleapis.com/covid-external/forecast_JAPAN_PREFECTURE_28.csv
+$人口動態統計 年次推移（東京都全体）出生数・死亡数・死産数・婚姻数・離婚数・合計特殊出生率・平均初婚年齢;$人口動態統計 年次推移（東京都全体）;#SJIS;$$https://www.fukushihoken.metro.tokyo.lg.jp/kiban/chosa_tokei/jinkodotaitokei/tokyotozentai.html;#%CSV;https://www.fukushihoken.metro.tokyo.lg.jp/kiban/chosa_tokei/jinkodotaitokei/tokyotozentai.files/tokyo_suii.csv
+$人口動態統計 年次推移（東京都全体）死因別の死亡数・死亡率（平成14年～令和元年）;$人口動態統計 年次推移（東京都全体）;#SJIS;$$https://www.fukushihoken.metro.tokyo.lg.jp/kiban/chosa_tokei/jinkodotaitokei/tokyotozentai.html;#%CSV;https://www.fukushihoken.metro.tokyo.lg.jp/kiban/chosa_tokei/jinkodotaitokei/tokyotozentai.files/shiin.csv
+$北海道振興局コロナ;$各日の振興局ごとの患者数;#SJIS;$$https://www.harp.lg.jp/opendata/dataset/1369.html;#%CSV;https://www.harp.lg.jp/opendata/dataset/1369/resource/3883/hokkaido_01shinkoukyoku_day.csv
+$北海道新型コロナ;$新型コロナウイルス感染症対策に関するオープンデータ項目定義書（Code for Japan）」に沿った形で情報;#SJIS;$$https://www.harp.lg.jp/opendata/dataset/1369.html;#%CSV;https://www.harp.lg.jp/opendata/dataset/1369/resource/2853/covid19_data.csv
+$都道府県別人口;#SJIS;#%CSV;D:\WSRC\VS2017\WPF\WpfApp\CalcApp\bin\Debug\ConvDic\都道府県別人口(20201001).csv
+$過去の気象データ・ダウンロード;$参照先でデータをダウンロードし、そのデータを読み込む;#SJIS;$$https://www.data.jma.go.jp/gmd/risk/obsdl/index.php;#%CSV;C:\Users\k-yos\Downloads\data.csv
+$日本シームレス地質図V2 凡例一覧表示;#UTF8;$$https://gbank.gsj.jp/seamless/v2/api/1.2.1/;#%TSV;https://gbank.gsj.jp/seamless/v2/api/1.2.1/legend.csv
+$厚生労働省新型コロナ;$厚生労働省データ(陽性者数、PCR検査実施人数、PCR検査実施件数,退院数,死亡者数、重症者数);#SCSV;$$https://www.mhlw.go.jp/stf/covid-19/open-data.html;#%CSV;https://covid19.mhlw.go.jp/public/opendata/newly_confirmed_cases_daily.csv,requiring_inpatient_care_etc_daily.csv,deaths_cumulative_daily.csv,severe_cases_daily.csv
+$GpsMemo_2021;#SCSV;#%CSV;C:\Users\k-yos\OneDrive\ドキュメント\GPSlogger\Memo\GpsMemo_2021.csv
+$神奈川県新型コロナウイルス感染症;$新型コロナウイルス感染症対策　陽性患者数及び陽性患者の属性データ;#SCSV;$$https://www.pref.kanagawa.jp/osirase/1369/;#%CSV;https://www.pref.kanagawa.jp/osirase/1369/data/csv/patient.csv
+$大阪府新型コロナ;$大阪府の最新感染動向;#SCSV;$$https://covid19-osaka.info/;#%CSV;https://covid19-osaka.info/data/summary.csv,severe-bed-usage.csv,summary.csv
+$GpsMemo_2020;#SCSV;#%CSV;C:\Users\k-yos\OneDrive\ドキュメント\GPSlogger\Memo\GpsMemo_2020.csv
+$神奈川_新型コロナ病床のキャパシティ;$ファイル名に日付が入っているので都度ファイル名を更新要;#SCSV;$$https://www.pref.kanagawa.jp/osirase/1369/;#%CSV;https://www.pref.kanagawa.jp/osirase/1369/data/20210613_capa-byosho.csv,20210613_capa-shukuhaku.csv
+$神奈川_新型コロナ陽性者数;#SCSV;$$https://www.pref.kanagawa.jp/osirase/1369/;#%CSV;https://www.pref.kanagawa.jp/osirase/1369/data/csv/patient.csv
+$ワクチン接種_和訳辞書;#SCSV;#%CSV;D:\WSRC\VS2017\WPF\WpfApp\CalcApp\bin\Debug\ConvDic\ワクチン接種_和訳辞書.csv
+$pcr_positive_daily;#SCSV;#%CSV;C:\Users\k-yos\OneDrive\一時データ\オープンデータ\COVID-19_厚生労働省\pcr_positive_daily.csv
+$大阪府コロナ_summary_by_prefecture;#SCSV;#%CSV;C:\Users\k-yos\OneDrive\一時データ\オープンデータ\summary_by_date.csv
+$北海道新型コロナデータ;#SCSV;$$https://www.harp.lg.jp/opendata/dataset/1369.html;#%CSV;https://www.harp.lg.jp/opendata/dataset/1369/resource/2853/covid19_data.csv
+$気象データ_気温_東京・札幌・遠軽;$気象データ_気温_東京・札幌・遠軽 (20180101-20201213);#SCSV;$$https://www.data.jma.go.jp/gmd/risk/obsdl/index.php;#%CSV;C:\Users\k-yos\OneDrive\一時データ\オープンデータ\気象データ\data_気温_東京・札幌・遠軽_20180101-20201213.csv
+$COVID-19 感染予測;$Google一般公開データ;#SCSV;$$https://datastudio.google.com/reporting/8224d512-a76e-4d38-91c1-935ba119eb8f/page/ncZpB?s=nXbF2P6La2M;#%CSV;https://storage.googleapis.com/covid-external/forecast_JAPAN_PREFECTURE_28.csv
+$COVID-19_厚生労働省_20201220;#SCSV;#%CSV;C:\Users\k-yos\OneDrive\一時データ\オープンデータ\COVID-19_厚生労働省\COVID-19_厚生労働省_20201220.csv
+$PowerGas;#SCSV;#%CSV;C:\Users\k-yos\Downloads\PowerGas.csv
+$公金支出情報（一般会計・特別会計）令和元年度　令和2年1月_op20200323_r1koukinsisyutujouhou_2020_01;#SCSV;#%CSV;C:\Users\k-yos\OneDrive\一時データ\オープンデータ\公金支出情報（一般会計・特別会計）令和元年度　令和2年1月_op20200323_r1koukinsisyutujouhou_2020_01.csv
+$明治33年～平成29年　東京都全体　出生数・死亡・死産・婚姻・離婚・合計特殊出生率・平均初婚年齢_tokyo_suii;#SCSV;#%CSV;C:\Users\k-yos\OneDrive\一時データ\オープンデータ\明治33年～平成29年　東京都全体　出生数・死亡・死産・婚姻・離婚・合計特殊出生率・平均初婚年齢_tokyo_suii.csv
+$data_気温_東京_198001上-202012上;#SCSV;#%CSV;C:\Users\k-yos\OneDrive\一時データ\オープンデータ\気象データ\data_気温_東京_198001上-202012上.csv

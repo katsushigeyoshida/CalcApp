@@ -1,0 +1,26 @@
+japan_prefecture_code,日本都道府県コード
+prefecture_name,都道府県名
+target_prediction_date,目標予測日
+cumulative_confirmed,累積確認済み
+cumulative_confirmed_q0025,累積_確認済み_q0025
+cumulative_confirmed_q0975,累積_確認済み_q0975
+cumulative_deaths,累積死亡数
+cumulative_deaths_q0025,累積死亡数_q0025
+cumulative_deaths_q0975,累積死亡数_q0975
+hospitalized_patients,入院患者数
+hospitalized_patients_q0025,入院患者数_q0025
+hospitalized_patients_q0975,入院患者数_q0975
+recovered,回復
+recovered_q0025,回復_q0025
+recovered_q0975,回復_q0975
+cumulative_confirmed_ground_truth,累積確認済み基底真理
+cumulative_deaths_ground_truth,累積死亡数 基底真理
+hospitalized_patients_ground_truth,入院中の患者さん 基底真理
+recovered_ground_truth,回復 基底真理
+forecast_date,予測日
+new_deaths,新死亡者
+new_confirmed,新確認済み
+new_deaths_ground_truth,新しい死因の真実
+new_confirmed_ground_truth,新・確証された根拠となる真実
+prefecture_name_kanji,都道府県名_漢字
+__index_level_0__,指標レベル0
