@@ -80,6 +80,8 @@ namespace CalcApp
             loadFuncList(mDataFileName);
             //loadDataFile();                         //  計算式リストの取込み
             setDataComboBox();
+            if (0 < titleList.Items.Count)
+                titleList.SelectedIndex = 0;
 
             minX.Text = "" + mXStart;
             maxX.Text = "" + mXEnd;
@@ -312,7 +314,7 @@ namespace CalcApp
             if (0 < mPositionList.Count) {
                 renderFrame();                          //  座標データから三次元表示
                 dataRegist();                           //  設定値登録
-                functionList.Text = mFunction;
+                titleList.SelectedIndex = 0;
             }
         }
 
@@ -323,8 +325,9 @@ namespace CalcApp
         /// <param name="e"></param>
         private void deleteBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (0 < functionList.Items.Count) {
-                mFuncList.RemoveAt(functionList.SelectedIndex);
+            int n = mFuncList.FindIndex(p => p[0].CompareTo(titleList.Text) == 0);
+            if (0 <= n) {
+                mFuncList.RemoveAt(n);
                 setDataComboBox();              //  コンボボックスのデータを更新
             }
         }
@@ -437,27 +440,9 @@ namespace CalcApp
                 if (0 <= titleList.SelectedIndex && mTitleSelectOn) {
                     dataFuncSet(titleList.SelectedIndex);
                     mFuncSelectOn = false;
-                    functionList.SelectedIndex = titleList.SelectedIndex;
                 }
             }
             mTitleSelectOn = true;
-        }
-
-        /// <summary>
-        /// 計算式の選択変更
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void functionList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (0 < functionList.Items.Count) {
-                if (0 <= functionList.SelectedIndex && mFuncSelectOn) {
-                    dataFuncSet(functionList.SelectedIndex);
-                    mTitleSelectOn = false;
-                    titleList.SelectedIndex = functionList.SelectedIndex;
-                }
-            }
-            mFuncSelectOn = true;
         }
 
         /// <summary>
@@ -467,14 +452,10 @@ namespace CalcApp
         {
             if (0 < mFuncList.Count) {
                 titleList.Items.Clear();
-                functionList.Items.Clear();
+                functionList.Clear();
                 foreach (string[] data in mFuncList) {
                     titleList.Items.Add(data[0]);
-                    functionList.Items.Add(data[1]);
                 }
-                //  ItemSourceを使うとデータの更新ができない
-                //titleList.ItemsSource = mTitleList;
-                //functionList.ItemsSource = mExpressionList;
             }
         }
 
@@ -496,8 +477,10 @@ namespace CalcApp
             data[9] = minZ.Text;
             data[10] = maxZ.Text;
             data[11] = autoHeight.IsChecked.ToString();
-            if (0 <= titleList.SelectedIndex && data[0].CompareTo(mFuncList[titleList.SelectedIndex][0]) == 0) {
-                mFuncList.RemoveAt(titleList.SelectedIndex);
+
+            int n = mFuncList.FindIndex(p => p[0].CompareTo(data[0]) == 0);
+            if (0 <= n){
+                mFuncList.RemoveAt(n);
             }
             mFuncList.Insert(0, data);
             setDataComboBox();      //  計算式をコンボボックスに登録
@@ -511,6 +494,9 @@ namespace CalcApp
         private void dataFuncSet(int n)
         {
             string[] data = mFuncList[n];
+
+            functionList.Text = data[1];
+
             //  変数の範囲を設定
             if (7 < data.Length) {
                 minX.Text = data[2];        //  X min

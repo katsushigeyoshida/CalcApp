@@ -13,7 +13,7 @@
         </StatusBar>
         <StatusBar Height="30" DockPanel.Dock="Top">
             <TextBlock x:Name="functionTitle" Text="関数 z=f(x,y)" Width="130" />
-            <ComboBox x:Name="functionList" IsEditable="True" FontSize="14" Width="380" SelectionChanged="functionList_SelectionChanged"  />
+            <TextBox x:Name="functionList" FontSize="14" Width="380" />
             <StatusBarItem HorizontalAlignment="Right">
                 <Button x:Name="executeBtn" Content="実行" Width="40" Click="executeBtn_Click" />
             </StatusBarItem>
