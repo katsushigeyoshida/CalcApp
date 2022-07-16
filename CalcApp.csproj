@@ -194,6 +194,8 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="Document\Func3DPlot.odt" />
+    <None Include="Document\FuncPlot.odt" />
     <None Include="GLGraph\OpenTK.dll.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
