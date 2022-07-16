@@ -23,7 +23,7 @@
                 <TextBlock Text="関数 f(x)" x:Name="functionTitle" />
             </StatusBarItem>
             <StatusBarItem  >
-                <ComboBox Name="functionList" IsEditable="True" FontSize="14" Width="450" SelectionChanged="FunctionList_SelectionChanged" />
+                <TextBox Name="functionList" FontSize="14" Width="450"  />
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
                 <Button x:Name="funcMenuBtn" Content="関数" Width="40" Click="FuncMenuBtn_Click" />
