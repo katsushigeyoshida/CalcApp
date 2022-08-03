@@ -1343,7 +1343,8 @@ namespace CalcApp
                 //  TSV形式
                 dataList = ylib.loadCsvData(path, true);
             } else if (Path.GetExtension(path).ToLower().CompareTo(".ndjson") == 0 ||
-                Path.GetExtension(path).ToLower().CompareTo(".json") == 0) {
+                Path.GetExtension(path).ToLower().CompareTo(".json") == 0 ||
+                Path.GetExtension(path).ToLower().CompareTo(".js") == 0) {
                 //  JSON形式
                 dataList = ylib.loadJsonData(path);
             }
