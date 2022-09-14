@@ -48,6 +48,7 @@ namespace CalcApp
         private string[] mScaleFormat = new string[] { "#,##0", "#,##0.###", "0.######" };
 
 
+
         public TableGraph()
         {
             InitializeComponent();
@@ -73,11 +74,11 @@ namespace CalcApp
             CbBackColor.ItemsSource = ydraw.getColorTitle(); ;
             CbBackColor.SelectedIndex = mBackColor;
             //  移動平均の設定
-            CbMovingAve.Items.Clear();
-            CbMovingAve.Items.Add("なし");
-            for (int i = 2; i < 50; i++)
-                CbMovingAve.Items.Add(i.ToString());
-            CbMovingAve.SelectedIndex = 0;
+            //CbMovingAve.Items.Clear();
+            //CbMovingAve.Items.Add("なし");
+            //for (int i = 2; i < 50; i++)
+            //    CbMovingAve.Items.Add(i.ToString());
+            //CbMovingAve.SelectedIndex = 0;
         }
 
         /// <summary>
@@ -266,11 +267,11 @@ namespace CalcApp
         /// <param name="e"></param>
         private void CbMovingAve_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (0 < CbMovingAve.SelectedIndex) {
-                mMovingAveSize = (int)mYlib.string2double(CbMovingAve.Items[CbMovingAve.SelectedIndex].ToString());
-            } else {
-                mMovingAveSize = 0;
-            }
+            //if (0 < CbMovingAve.SelectedIndex) {
+            //    mMovingAveSize = (int)mYlib.string2double(CbMovingAve.Items[CbMovingAve.SelectedIndex].ToString());
+            //} else {
+            //    mMovingAveSize = 0;
+            //}
             DrawGraph();
         }
 
@@ -324,6 +325,7 @@ namespace CalcApp
                 DrawGraph();
                 return;
             } else if (menuItem.Name.CompareTo("CmScale") == 0) {
+                //  値をスケール倍する
                 InputBox dlg = new InputBox();
                 dlg.mMainWindow = this;
                 dlg.Title = "スケール値の設定";
@@ -334,6 +336,27 @@ namespace CalcApp
                     mDoubleList.scaleedData(selItemNo + 1, mYlib.string2double(dlg.mEditText));
                     DrawGraph();
                 }
+                return;
+            } else if (menuItem.Name.CompareTo("CmRegression") == 0) {
+                //  回帰曲線の表示
+                mStackDoubeData.Push(mDoubleList);
+                mDoubleList = mDoubleList.fromCopy();
+                mDoubleList.setRegressionData(selItemNo + 1, false);
+                DrawGraph();
+                return;
+            } else if (menuItem.Name.CompareTo("CmRegressionOffset") == 0) {
+                //  回帰曲線の表示
+                mStackDoubeData.Push(mDoubleList);
+                mDoubleList = mDoubleList.fromCopy();
+                mDoubleList.setRegressionData(selItemNo + 1);
+                DrawGraph();
+                return;
+            } else if (menuItem.Name.CompareTo("CmRegressionClear") == 0) {
+                //  回帰曲線をクリア
+                mStackDoubeData.Push(mDoubleList);
+                mDoubleList = mDoubleList.fromCopy();
+                mDoubleList.clearRegressionData(selItemNo + 1);
+                DrawGraph();
                 return;
             } else {
                 return;
@@ -504,25 +527,45 @@ namespace CalcApp
                     }
                 }
             }
-            if (1 < mMovingAveSize) {
-                //  移動平均の折線追加
-                if (mGraphType == GRAPHTYPE.BAR_GRAPH) {
-                    for (int j = 1; j < mDoubleList.mDataTitle.Length; j++) {
-                        if (!mLegendItems[j - 1].Checked)
-                            continue;
-                        double[] barData = getBarData(j);
-                        ydraw.setThickness(2);
-                        ydraw.setColor(mDoubleList.mColor[j]);
-                        DrawMovingAverage(barData, mMovingAveSize);
+            //  回帰曲線を表示
+            for (int i = 0; i < mDoubleList.mRegression.Count; i++) {
+                if (mDoubleList.mRegression[i] != null) {
+                    Point ps = mDoubleList.getRegressionData(i, mDoubleList.mData[mStartPos][0]);
+                    Point pe = mDoubleList.getRegressionData(i, mDoubleList.mData[mEndPos][0]);
+                    ydraw.setColor(mDoubleList.mColor[i]);
+                    ydraw.drawLine(ps, pe);
+                    //  分散分平方根のオフセットを表示
+                    double offset = Math.Sqrt(mDoubleList.mRegression[i][4]);
+                    if (0 < offset) {
+                        ps = mDoubleList.getRegressionData(i, mDoubleList.mData[mStartPos][0], offset);
+                        pe = mDoubleList.getRegressionData(i, mDoubleList.mData[mEndPos][0], offset);
+                        ydraw.drawLine(ps, pe);
+                        ps = mDoubleList.getRegressionData(i, mDoubleList.mData[mStartPos][0], -offset);
+                        pe = mDoubleList.getRegressionData(i, mDoubleList.mData[mEndPos][0], -offset);
+                        ydraw.drawLine(ps, pe);
                     }
-                } else if (mGraphType == GRAPHTYPE.STACKEDBAR_GRAPH) {
-                    //  積上げ式棒グラフの時は累積値のみ表示
-                    double[] stackedData = getStackedData();
-                    ydraw.setThickness(3);
-                    ydraw.setColor(Brushes.OrangeRed);
-                    DrawMovingAverage(stackedData, mMovingAveSize);
                 }
             }
+
+            //if (1 < mMovingAveSize) {
+            //    //  移動平均の折線追加
+            //    if (mGraphType == GRAPHTYPE.BAR_GRAPH) {
+            //        for (int j = 1; j < mDoubleList.mDataTitle.Length; j++) {
+            //            if (!mLegendItems[j - 1].Checked)
+            //                continue;
+            //            double[] barData = getBarData(j);
+            //            ydraw.setThickness(2);
+            //            ydraw.setColor(mDoubleList.mColor[j]);
+            //            DrawMovingAverage(barData, mMovingAveSize);
+            //        }
+            //    } else if (mGraphType == GRAPHTYPE.STACKEDBAR_GRAPH) {
+            //        //  積上げ式棒グラフの時は累積値のみ表示
+            //        double[] stackedData = getStackedData();
+            //        ydraw.setThickness(3);
+            //        ydraw.setColor(Brushes.OrangeRed);
+            //        DrawMovingAverage(stackedData, mMovingAveSize);
+            //    }
+            //}
         }
 
         /// <summary>
@@ -752,7 +795,15 @@ namespace CalcApp
                     ydraw.drawRectangle(rect, 0);
                     string title = mDoubleList.mDataTitle[i];
                     if (1 != mDoubleList.mScale[i])
-                        title += "(" + mDoubleList.mScale[i] + "培値)";
+                        title += "(" + mDoubleList.mScale[i] + "倍値)";
+                    if (mDoubleList.mRegression[i] != null) {
+                        title += $" 回帰係数 a={mDoubleList.mRegression[i][0].ToString("#.###")}";
+                        title += $" b={mDoubleList.mRegression[i][1].ToString("#.###")}";
+                        title += $" 相関係数={mDoubleList.mRegression[i][2].ToString("#.###")}";
+                        title += $" 決定係数={mDoubleList.mRegression[i][3].ToString("#.###")}";
+                        if (0 < mDoubleList.mRegression[i][4])
+                            title += $" 分散={Math.Sqrt(mDoubleList.mRegression[i][4]).ToString("#.###")}";
+                    }
                     ydraw.drawText(title, rect.Right + Math.Abs(2 / ydraw.world2screenXlength(1)),
                         rect.Y + Math.Abs(mTextSize / 2 / ydraw.world2screenYlength(1)), 0);
                     rect.Y -= Math.Abs(mTextSize / ydraw.world2screenYlength(1));

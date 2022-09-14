@@ -16,12 +16,14 @@
             <ComboBox Name="CbEndPos" SelectionChanged="CbEndPos_SelectionChanged" />
             <TextBlock Text="操作" />
             <ComboBox Name="CbOperation" SelectionChanged="CbOperation_SelectionChanged" />
+            <!--
             <TextBlock Text="移動平均" />
             <ComboBox Name="CbMovingAve" SelectionChanged="CbMovingAve_SelectionChanged" />
+            -->
             <TextBlock Text="背景色" />
             <ComboBox Name="CbBackColor" SelectionChanged="CbBackColor_SelectionChanged" />
             <TextBlock Text="データの種類" />
-            <ListBox Name="LbTitleList" SelectionMode="Single" Height="175" MouseDoubleClick="LbTitleList_MouseDoubleClick" 
+            <ListBox Name="LbTitleList" SelectionMode="Single" Height="205" MouseDoubleClick="LbTitleList_MouseDoubleClick" 
                      ToolTip="ダブルクリックするとチェックを反転する" >
                 <ListBox.ItemTemplate>
                     <DataTemplate>
@@ -36,6 +38,9 @@
                         <MenuItem Name="CmColorSet" Header="色を設定する" Click="CmCheckMenu_Click" />
                         <MenuItem Name="CmScaleReset" Header="実値に戻す" Click="CmCheckMenu_Click" />
                         <MenuItem Name="CmScale" Header="値をスケール倍する" Click="CmCheckMenu_Click" />
+                        <MenuItem Name="CmRegression" Header="回帰曲線表示" Click="CmCheckMenu_Click" />
+                        <MenuItem Name="CmRegressionOffset" Header="回帰曲線(オフセット付)表示" Click="CmCheckMenu_Click" />
+                        <MenuItem Name="CmRegressionClear" Header="回帰曲線を削除" Click="CmCheckMenu_Click" />
                     </ContextMenu>
                 </ListBox.ContextMenu>
             </ListBox>

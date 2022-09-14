@@ -27,9 +27,11 @@ namespace CalcApp
         public SheetData.DATATYPE mDataSubType;             //  列のデータタイプ
         public List<Brush> mColor = new List<Brush>();      //  列のカラーコード
         public List<double> mScale = new List<double>();    //  項目データのスケール値
+        public List<double[]> mRegression = new List<double[]>();   //  回帰係数
         public Rect mArea = new Rect();                     //  配列リストの領域(最大最小値
 
         private YDrawingShapes ydraw = new YDrawingShapes();
+        private YLib ylib = new YLib();
 
         /// <summary>
         /// コンストラクタ
@@ -61,11 +63,12 @@ namespace CalcApp
         /// <param name="disp">表示可否リスト</param>
         /// <param name="color">色リスト</param>
         /// <param name="scale">スケールリスト</param>
+        /// <param name="regression">回帰曲線データ</param>
         public DoubleList(List<double[]> data, string[] dataTitle, string[] rowTitle,
             SheetData.DATATYPE dataType, SheetData.DATATYPE dataSubType,
-            List<bool> disp, List<Brush> color, List<double> scale)
+            List<bool> disp, List<Brush> color, List<double> scale, List<double[]> regression)
         {
-            setData(data, dataTitle, rowTitle, dataType, dataSubType, disp, color, scale);
+            setData(data, dataTitle, rowTitle, dataType, dataSubType, disp, color, scale, regression);
         }
 
         /// <summary>
@@ -76,10 +79,13 @@ namespace CalcApp
             mDisp.Clear();
             mColor.Clear();
             mScale.Clear();
+            mRegression.Clear();
             for (int i = 0; i < mData[0].Length; i++) {
                 mDisp.Add(true);
                 mColor.Add(ydraw.getColor15(i));
-                mScale.Add(1.0);            }
+                mScale.Add(1.0);
+                mRegression.Add(null);
+            }
         }
 
         /// <summary>
@@ -89,7 +95,7 @@ namespace CalcApp
         public DoubleList fromCopy()
         {
             DoubleList doubleList = new DoubleList(mData, mDataTitle, mRowTitle,
-                mDataType,mDataSubType, mDisp, mColor, mScale);
+                mDataType,mDataSubType, mDisp, mColor, mScale, mRegression);
             return doubleList;
         }
 
@@ -99,7 +105,7 @@ namespace CalcApp
         /// <param name="data">数値配列データ</param>
         public void setData(DoubleList data)
         {
-            mData = new List<double[]>(data.mData);
+            mData = ListArrayCopy(data.mData);
             mDataTitle = new string[data.mDataTitle.Length];
             Array.Copy(data.mDataTitle, mDataTitle, data.mDataTitle.Length);
             mRowTitle = new string[data.mRowTitle.Length];
@@ -109,6 +115,7 @@ namespace CalcApp
             mDisp = new List<bool>(data.mDisp);
             mColor = new List<Brush>(data.mColor);
             mScale = new List<double>(data.mScale);
+            mRegression = ListArrayCopy(data.mRegression);
             mArea = new Rect(data.mArea.X, data.mArea.Y, data.mArea.Width, data.mArea.Height);
         }
 
@@ -123,11 +130,12 @@ namespace CalcApp
         /// <param name="disp">表示可否リスト</param>
         /// <param name="color">色リスト</param>
         /// <param name="scale">スケールリスト</param>
+        /// <param name="regression">回帰曲線データ</param>
         public void setData(List<double[]> data, string[] dataTitle, string[] rowTitle,
             SheetData.DATATYPE dataType, SheetData.DATATYPE dataSubType,
-            List<bool> disp, List<Brush> color, List<double> scale)
+            List<bool> disp, List<Brush> color, List<double> scale, List<double[]> regression)
         {
-            mData = new List<double[]>(data);
+            mData = ListArrayCopy(data);
             mDataTitle = new string[dataTitle.Length];
             Array.Copy(dataTitle, mDataTitle, dataTitle.Length);
             mRowTitle = new string[rowTitle.Length];
@@ -137,6 +145,27 @@ namespace CalcApp
             mDisp = new List<bool>(disp);
             mColor = new List<Brush>(color);
             mScale = new List<double>(scale);
+            mRegression = ListArrayCopy(regression);
+        }
+
+        /// <summary>
+        /// リスト配列データをディープコピー
+        /// </summary>
+        /// <param name="slist">ソース配列リスト</param>
+        /// <returns>コピー配列リスト</returns>
+        private List<double[]> ListArrayCopy(List<double[]> slist)
+        {
+            List<double[]> dlist = new List<double[]>();
+            for (int i = 0; i < slist.Count; i++) {
+                if (slist[i] == null) {
+                    dlist.Add(null);
+                } else {
+                    double[] t = new double[slist[i].Length];
+                    Array.Copy(slist[i], t, slist[i].Length);
+                    dlist.Add(t);
+                }
+            }
+            return dlist;
         }
 
         /// <summary>
@@ -163,6 +192,49 @@ namespace CalcApp
                 doubleData.Add(dest);
             }
             mData = doubleData;
+        }
+
+        /// <summary>
+        /// 回帰曲線の係数を求める
+        /// </summary>
+        /// <param name="col">対象列</param>
+        public void setRegressionData(int col, bool regVariance = true)
+        {
+            List<Point> pointData = new List<Point>();
+            for (int i = 0; i < mData.Count; i++) {
+                pointData.Add(new Point(mData[i][0], mData[i][col]));
+            }
+            double a = ylib.getRegA(pointData);        //  係数a
+            double b = ylib.getRegB(pointData);        //  係数b
+            double[] regData = new double[] {
+                a, b,
+                ylib.getCorelation(pointData),                      //  相関係数
+                ylib.getCoefficentDeterminatio(pointData, a, b),    //  決定係数
+                regVariance ? ylib.getRegVariance(pointData, a, b) : 0.0    //  理論値に対する分散
+            };
+            mRegression[col] = regData;
+        }
+
+        /// <summary>
+        /// 回帰曲線の係数を初期化(null)
+        /// </summary>
+        /// <param name="col"></param>
+        public void clearRegressionData(int col)
+        {
+            mRegression[col] = null;
+        }
+
+        /// <summary>
+        /// 回帰曲線の座標を求める
+        /// </summary>
+        /// <param name="col">対象列</param>
+        /// <param name="x">Xの値</param>
+        /// <param name="offset">Y方向のオフセット</param>
+        /// <returns>座標</returns>
+        public Point getRegressionData(int col, double x, double offset = 0)
+        {
+            double y = mRegression[col][0] * x + mRegression[col][1] + offset;
+            return new Point(x, y);
         }
 
         /// <summary>
