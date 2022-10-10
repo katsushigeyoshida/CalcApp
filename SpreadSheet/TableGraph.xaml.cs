@@ -31,6 +31,8 @@ namespace CalcApp
         private double mTextSize = 15;                  //  文字の大きさ
         private double mStepYsize;                      //  グラフの補助線の間隔
         private double mStepXsize;                      //  グラフの補助線の間隔
+        private double mStepYsizeScale = 1.0;           //  縦軸補助線間隔倍率
+        private double mStepXsizeScale = 1.0;           //  横軸補助線間隔倍率
         private Rect mArea;                             //  グラフの表示領域
         private double mBarWidth;                       //  棒グラフの棒の幅
         //private SheetData.DATATYPE mDataType;           //  各列のデータタイプ
@@ -371,6 +373,37 @@ namespace CalcApp
         }
 
         /// <summary>
+        /// グラフ上のコンテキストメニュー
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CmAxisAux_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = (MenuItem)e.Source;
+            if (menuItem.Name.CompareTo("CmYAxisAux") == 0) {
+                InputBox dlg = new InputBox();
+                dlg.mMainWindow = this;
+                dlg.Title = "縦軸目盛間隔倍率";
+                dlg.mEditText = mStepYsizeScale.ToString();
+                var result = dlg.ShowDialog();
+                if (result == true) {
+                    mStepYsizeScale = mYlib.doubleParse(dlg.mEditText, mStepYsizeScale);
+                    DrawGraph();
+                }
+            } else if (menuItem.Name.CompareTo("CmXAxisAux") == 0) {
+                InputBox dlg = new InputBox();
+                dlg.mMainWindow = this;
+                dlg.Title = "横軸目盛間隔倍率";
+                dlg.mEditText = mStepXsizeScale.ToString();
+                var result = dlg.ShowDialog();
+                if (result == true) {
+                    mStepXsizeScale = mYlib.doubleParse(dlg.mEditText, mStepXsizeScale);
+                    DrawGraph();
+                }
+            }
+        }
+
+        /// <summary>
         /// 背景色の変更
         /// </summary>
         /// <param name="sender"></param>
@@ -647,6 +680,8 @@ namespace CalcApp
             //  補助線の間隔を設定
             mStepYsize = mYlib.graphStepSize(mArea.Height, 5);  //  縦軸目盛り線の間隔
             mStepXsize = mYlib.graphStepSize(mArea.Width, 10);  //  横軸目盛り線の間隔
+            mStepYsize *= mStepYsizeScale;
+            mStepXsize *= mStepXsizeScale;
 
             //  グラフ高さの調整
             if (mArea.Y < 0) {

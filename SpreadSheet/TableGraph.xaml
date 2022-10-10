@@ -46,6 +46,12 @@
             </ListBox>
         </StackPanel>
         <Canvas x:Name="canvas" >
+            <Canvas.ContextMenu >
+                <ContextMenu >
+                    <MenuItem Name="CmYAxisAux" Header="縦軸目盛間隔" Click="CmAxisAux_Click"  />
+                    <MenuItem Name="CmXAxisAux" Header="横軸目盛間隔" Click="CmAxisAux_Click"  />
+                </ContextMenu>
+            </Canvas.ContextMenu>
         </Canvas>
     </DockPanel>
 </Window>
