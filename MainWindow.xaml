@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="250" Width="190" Closing="MainWindow_Closing">
     <Grid>
-        <ListBox Name="ProgramList" MouseDoubleClick="ProgramList_MouseDoubleClick"/>
+        <ListBox Name="ProgramList" MouseDoubleClick="ProgramList_MouseDoubleClick" PreviewKeyDown="ProgramList_PreviewKeyDown"/>
 
     </Grid>
 </Window>

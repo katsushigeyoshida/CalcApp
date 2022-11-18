@@ -41,27 +41,6 @@ namespace CalcApp
         }
 
         /// <summary>
-        /// 選択されたプログラムを実行する
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ProgramList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            Window programDlg = null;
-            switch (ProgramList.SelectedIndex) {
-                case 0: programDlg = new Calculate(); break;
-                case 1: programDlg = new Fractal(); break;
-                case 2: programDlg = new FuncPlot(); break;
-                case 3: programDlg = new GLGraph(); break;
-                case 4: programDlg = new SpreadSheet(); break;
-                case 5: programDlg = new RegressionAnalysis(); break;
-            }
-            if (programDlg != null)
-                programDlg.Show();
-            //programDlg.ShowDialog();
-        }
-
-        /// <summary>
         /// Windowの状態を前回の状態にする
         /// </summary>
         private void WindowFormLoad()
@@ -78,6 +57,8 @@ namespace CalcApp
                 this.Width = Properties.Settings.Default.MainWindowWidth;
                 this.Height = Properties.Settings.Default.MainWindowHeight;
             }
+
+            ProgramList.Focus();
         }
 
         /// <summary>
@@ -91,6 +72,47 @@ namespace CalcApp
             Properties.Settings.Default.MainWindowWidth = this.Width;
             Properties.Settings.Default.MainWindowHeight = this.Height;
             Properties.Settings.Default.Save();
+        }
+
+        /// <summary>
+        /// プログラムリストのダブルクリック処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ProgramList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            executeProg();
+        }
+
+        /// <summary>
+        /// プログラムリストのキー入力処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ProgramList_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter) {
+                executeProg();
+            }
+        }
+
+        /// <summary>
+        /// 選択されたプログラムを実行する
+        /// </summary>
+        private void executeProg()
+        {
+            Window programDlg = null;
+            switch (ProgramList.SelectedIndex) {
+                case 0: programDlg = new Calculate(); break;
+                case 1: programDlg = new Fractal(); break;
+                case 2: programDlg = new FuncPlot(); break;
+                case 3: programDlg = new GLGraph(); break;
+                case 4: programDlg = new SpreadSheet(); break;
+                case 5: programDlg = new RegressionAnalysis(); break;
+            }
+            if (programDlg != null)
+                programDlg.Show();
+            //programDlg.ShowDialog();
         }
     }
 }
