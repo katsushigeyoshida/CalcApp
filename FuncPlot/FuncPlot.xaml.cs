@@ -721,7 +721,7 @@ namespace CalcApp
             ydraw.setScreenTextSize(15);
             ydraw.setTextColor(Brushes.Black);
             ydraw.setColor(Brushes.Aqua);
-            ydraw.drawRectangle(mXmin, ymax, dx, dy, 0);
+            ydraw.drawWRectangle(new Rect(mXmin, ymax, dx, dy), 0);
             double auxDx = ylib.graphStepSize(dx, 5);
             double auxDy = ylib.graphStepSize(dy, 5);
             for (x = Math.Floor(mXmin / auxDx) * auxDx; x <= mXmax; x += auxDx) {
@@ -734,8 +734,8 @@ namespace CalcApp
                         ydraw.setColor(Brushes.Aqua);
                         ydraw.setTextColor(Brushes.Black);
                     }
-                    ydraw.drawLine(x, ymin, x, ymax);
-                    ydraw.drawText(x.ToString("F"), new Point(x, ymin), 0, HorizontalAlignment.Center, VerticalAlignment.Top);
+                    ydraw.drawWLine(new Point(x, ymin), new Point(x, ymax));
+                    ydraw.drawWText(x.ToString("F"), new Point(x, ymin), 0, HorizontalAlignment.Center, VerticalAlignment.Top);
                 }
             }
             for (y = Math.Floor(ymin / auxDy) * auxDy; y <= ymax; y += auxDy) {
@@ -748,8 +748,8 @@ namespace CalcApp
                         ydraw.setColor(Brushes.Aqua);
                         ydraw.setTextColor(Brushes.Black);
                     }
-                    ydraw.drawLine(mXmin, y, mXmax, y);
-                    ydraw.drawText(y.ToString("F"), new Point(mXmin, y), 0, HorizontalAlignment.Right, VerticalAlignment.Center);
+                    ydraw.drawWLine(new Point(mXmin, y), new Point(mXmax, y));
+                    ydraw.drawWText(y.ToString("F"), new Point(mXmin, y), 0, HorizontalAlignment.Right, VerticalAlignment.Center);
                 }
             }
 
@@ -779,7 +779,7 @@ namespace CalcApp
         {
             //  両端が領域内はそのまま表示
             if (ymin <= ps.Y && ps.Y <= ymax && ymin <= pe.Y && pe.Y <= ymax) {
-                ydraw.drawLine(ps, pe);
+                ydraw.drawWLine(ps, pe);
                 return;
             }
             //  線分が領域を跨内場合は表示しない
@@ -798,7 +798,7 @@ namespace CalcApp
                 pe.X = (ymax - b) / a;
                 pe.Y = ymax;
             }
-            ydraw.drawLine(ps, pe);
+            ydraw.drawWLine(ps, pe);
         }
 
         /// <summary>

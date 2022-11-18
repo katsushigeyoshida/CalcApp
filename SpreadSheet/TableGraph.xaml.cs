@@ -532,20 +532,20 @@ namespace CalcApp
                     if (mGraphType == GRAPHTYPE.LINE_GRAPH) {
                         //  折れ線グラフ
                         ydraw.setColor(mDoubleList.mColor[j]);
-                        ydraw.drawLine(ps[0], ps[j], pe[0], pe[j]);
+                        ydraw.drawWLine(new Point(ps[0], ps[j]), new Point(pe[0], pe[j]));
                     } else if (mGraphType == GRAPHTYPE.STACKEDLINE_GRAPH) {
                         //  積上げ式折線グラフ
                         ys += ps[j];
                         ye += pe[j];
                         ydraw.setColor(mDoubleList.mColor[j]);
-                        ydraw.drawLine(ps[0], ys, pe[0], ye);
+                        ydraw.drawWLine(new Point(ps[0], ys), new Point(pe[0], ye));
                     } else if (mGraphType == GRAPHTYPE.BAR_GRAPH) {
                         //  棒グラフ
                         ye = pe[j];
                         if (200 < (mEndPos - mStartPos) * mDoubleList.mDataTitle.Length)
                             ydraw.setColor(mDoubleList.mColor[j]);
                         ydraw.setFillColor(mDoubleList.mColor[j]);
-                        ydraw.drawRectangle(new Point(pe[0] - barXOffset + barWidth * n, ys),
+                        ydraw.drawWRectangle(new Point(pe[0] - barXOffset + barWidth * n, ys),
                             new Point(pe[0] - barXOffset + barWidth * (n + 1), ye), 0);
                         n++;
                     } else if (mGraphType == GRAPHTYPE.STACKEDBAR_GRAPH) {
@@ -554,7 +554,7 @@ namespace CalcApp
                         if (200 < (mEndPos - mStartPos))
                             ydraw.setColor(mDoubleList.mColor[j]);
                         ydraw.setFillColor(mDoubleList.mColor[j]);
-                        ydraw.drawRectangle(new Point(pe[0] - barXOffset, ys),
+                        ydraw.drawWRectangle(new Point(pe[0] - barXOffset, ys),
                             new Point(pe[0] - barXOffset + barWidth, ye), 0);
                         ys = ye;
                     }
@@ -566,16 +566,16 @@ namespace CalcApp
                     Point ps = mDoubleList.getRegressionData(i, mDoubleList.mData[mStartPos][0]);
                     Point pe = mDoubleList.getRegressionData(i, mDoubleList.mData[mEndPos][0]);
                     ydraw.setColor(mDoubleList.mColor[i]);
-                    ydraw.drawLine(ps, pe);
+                    ydraw.drawWLine(ps, pe);
                     //  分散分平方根のオフセットを表示
                     double offset = Math.Sqrt(mDoubleList.mRegression[i][4]);
                     if (0 < offset) {
                         ps = mDoubleList.getRegressionData(i, mDoubleList.mData[mStartPos][0], offset);
                         pe = mDoubleList.getRegressionData(i, mDoubleList.mData[mEndPos][0], offset);
-                        ydraw.drawLine(ps, pe);
+                        ydraw.drawWLine(ps, pe);
                         ps = mDoubleList.getRegressionData(i, mDoubleList.mData[mStartPos][0], -offset);
                         pe = mDoubleList.getRegressionData(i, mDoubleList.mData[mEndPos][0], -offset);
-                        ydraw.drawLine(ps, pe);
+                        ydraw.drawWLine(ps, pe);
                     }
                 }
             }
@@ -612,7 +612,7 @@ namespace CalcApp
             for (int i = mStartPos; i < mEndPos; i++) {
                 double ps = mDoubleList.mData[i][0];
                 double pe = mDoubleList.mData[i + 1][0];
-                ydraw.drawLine(ps, movingAveData[i], pe, movingAveData[i + 1]);
+                ydraw.drawWLine(new Point(ps, movingAveData[i]), new Point(pe, movingAveData[i + 1]));
             }
         }
 
@@ -718,14 +718,14 @@ namespace CalcApp
 
             //  縦軸の目盛り文字列の最大幅を求める(leftMargine)
             for (double y = mArea.Y; y <= mArea.Y + mArea.Height; y += mStepYsize) {
-                Size size = ydraw.measureText(y.ToString(mScaleFormat[scaleFormatType]));
+                Size size = ydraw.measureWText(y.ToString(mScaleFormat[scaleFormatType]));
                 leftMargine = Math.Max(leftMargine, size.Width);
             }
             leftMargine += rightMargine;
             //  横軸の目盛り文字列の最大幅を求める(bottomMargine)
             for (double x = mArea.X; x <= mArea.X + mArea.Width; x += mStepXsize) {
                 if (mDoubleList.mDataType != SheetData.DATATYPE.STRING || x < mSheetData.getDataSize()) {
-                    Size size = ydraw.measureText(YTitle2String(x, mDoubleList.mDataType));
+                    Size size = ydraw.measureWText(YTitle2String(x, mDoubleList.mDataType));
                     bottomMargine = Math.Max(bottomMargine, size.Width);
                 }
             }
@@ -756,9 +756,9 @@ namespace CalcApp
             ydraw.setColor(Brushes.Gray);
             for (double y = mArea.Y; y <= mArea.Y + mArea.Height; y += mStepYsize) {
                 //  補助線
-                ydraw.drawLine(mArea.X, y, mArea.X + mArea.Width, y);
+                ydraw.drawWLine(new Point(mArea.X, y), new Point(mArea.X + mArea.Width, y));
                 //  目盛
-                ydraw.drawText(y.ToString(mScaleFormat[scaleFormatType]), 
+                ydraw.drawWText(y.ToString(mScaleFormat[scaleFormatType]), 
                     new Point(mArea.X, y), 0, 
                     HorizontalAlignment.Right, VerticalAlignment.Center);
             }
@@ -772,14 +772,14 @@ namespace CalcApp
                 double x = mDoubleList.mData[i][0];
                 //  補助線表示
                 if (axisLine <= x || i == mEndPos)
-                    ydraw.drawLine(x, mArea.Y, x, mArea.Y + mArea.Height);
+                    ydraw.drawWLine(new Point(x, mArea.Y), new Point(x, mArea.Y + mArea.Height));
                 //  目盛表示
                 if (axisLine <= x && textDistance < mDoubleList.mData[mEndPos][0] - x   //  指定ステップ
                     || i == mEndPos                                                     //  最終位置
                     || (mDoubleList.mDataType == SheetData.DATATYPE.STRING && x < mSheetData.getDataSize()) //  目盛種別が文字
                     //|| mDoubleList.mDataType == SheetData.DATATYPE.WEEKDAY                                //  目盛種別が曜日
                     )
-                    ydraw.drawText(YTitle2String(x, mDoubleList.mDataType), new Point(x, mArea.Y - textMargine),
+                    ydraw.drawWText(YTitle2String(x, mDoubleList.mDataType), new Point(x, mArea.Y - textMargine),
                         -Math.PI / 2, HorizontalAlignment.Left, VerticalAlignment.Center);
                 if (axisLine <= x)
                     axisLine += mStepXsize;
@@ -788,7 +788,7 @@ namespace CalcApp
             //  グラフ枠の表示
             ydraw.setColor(Brushes.Black);
             ydraw.setFillColor(null);
-            ydraw.drawRectangle(mArea.X, mArea.Y + mArea.Height, mArea.Width, mArea.Height, 0);
+            ydraw.drawWRectangle(new Rect(mArea.X, mArea.Y + mArea.Height, mArea.Width, mArea.Height), 0);
         }
 
         /// <summary>
@@ -827,7 +827,7 @@ namespace CalcApp
             for (int i = mDoubleList.mDataTitle.Length - 1; 0 < i ; i--) {
                 if (mLegendItems[i - 1].Checked) {
                     ydraw.setFillColor(mDoubleList.mColor[i]);
-                    ydraw.drawRectangle(rect, 0);
+                    ydraw.drawWRectangle(rect, 0);
                     string title = mDoubleList.mDataTitle[i];
                     if (1 != mDoubleList.mScale[i])
                         title += "(" + mDoubleList.mScale[i] + "倍値)";
@@ -839,8 +839,8 @@ namespace CalcApp
                         if (0 < mDoubleList.mRegression[i][4])
                             title += $" 分散={Math.Sqrt(mDoubleList.mRegression[i][4]).ToString("#.###")}";
                     }
-                    ydraw.drawText(title, rect.Right + Math.Abs(2 / ydraw.world2screenXlength(1)),
-                        rect.Y + Math.Abs(mTextSize / 2 / ydraw.world2screenYlength(1)), 0);
+                    ydraw.drawWText(title, new Point(rect.Right + Math.Abs(2 / ydraw.world2screenXlength(1)),
+                        rect.Y + Math.Abs(mTextSize / 2 / ydraw.world2screenYlength(1))), 0);
                     rect.Y -= Math.Abs(mTextSize / ydraw.world2screenYlength(1));
                 }
             }
