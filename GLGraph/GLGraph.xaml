@@ -9,11 +9,11 @@
     <DockPanel>
         <StatusBar Height="30" DockPanel.Dock="Top" >
             <TextBlock Text="タイトル" Width="130" />
-            <ComboBox Name="titleList" IsEditable="True" Width="380" SelectionChanged="titleList_SelectionChanged" />
+            <ComboBox Name="titleList" IsEditable="True" Width="380" SelectionChanged="titleList_SelectionChanged" MouseDoubleClick="titleList_MouseDoubleClick" />
         </StatusBar>
         <StatusBar Height="30" DockPanel.Dock="Top">
             <TextBlock x:Name="functionTitle" Text="関数 z=f(x,y)" Width="130" />
-            <TextBox x:Name="functionList" FontSize="14" Width="380" />
+            <TextBox x:Name="functionList" FontSize="14" Width="380" MouseDoubleClick="functionList_MouseDoubleClick" />
             <StatusBarItem HorizontalAlignment="Right">
                 <Button x:Name="executeBtn" Content="実行" Width="40" Click="executeBtn_Click" />
             </StatusBarItem>

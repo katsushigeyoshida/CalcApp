@@ -34,7 +34,8 @@ namespace CalcApp
 
         private List<string[]> mFuncList;                       //  計算式リスト
         private string[] mFuncListTitle = {                     //  計算式リストのタイトル
-            "タイトル", "関数式", "Xmin", "Xmax", "X分割数", "Ymin", "Ymax", "Y分割数", "種別", "Zmin", "Zmax", "Z自動"
+            "タイトル", "関数式", "Xmin", "Xmax", "X分割数", "Ymin", "Ymax", "Y分割数", 
+            "種別", "Zmin", "Zmax", "Z自動", "コメント"
         };
         private Dictionary<string, string[]> mFuncData = new Dictionary<string, string[]>(); //  計算式リストデータ
         private enum FUNCTION_TYPE { Normal, Parametric, Polar, Non };   //  関数の種類(一般、媒介変数,極方程式)
@@ -43,6 +44,7 @@ namespace CalcApp
         //private List<string> mExpressionList = new List<string>();
         private bool mTitleSelectOn = true;
         private bool mFuncSelectOn = true;
+        private int mFuncEditboxFontSize = 12;
 
         private List<Vector3[,]> mPositionList;     //  座標データリスト
         private int mXDivideCount = 40;             //  X方向の分割数
@@ -55,6 +57,7 @@ namespace CalcApp
         private Vector3 mMax;                       //  表示領域の最大値
         private Vector3 mManMin;
         private Vector3 mManMax;
+        private string mComment = "";
 
         private bool mError = false;
         private string mErrorMsg = "";
@@ -83,15 +86,20 @@ namespace CalcApp
             if (0 < titleList.Items.Count)
                 titleList.SelectedIndex = 0;
 
+            mFuncEditboxFontSize = Properties.Settings.Default.FuncEditboxFontSize;
+
             minX.Text = "" + mXStart;
             maxX.Text = "" + mXEnd;
             diveXCount.Text = "" + mXDivideCount;
             minY.Text = "" + mYStart;
             maxY.Text = "" + mYEnd;
             diveYCount.Text = "" + mYDivideCount;
-            //titleList.Text = "サンプル";
+            titleList.Text = "サンプル";
             functionList.Text = mFunction;
             rbNormal.IsChecked = true;
+
+            if (0 < mFuncList.Count)
+                titleList.SelectedIndex = 0;
 
             glControl = new GLControl();
             m3Dlib = new GL3DLib(glControl);
@@ -150,6 +158,7 @@ namespace CalcApp
             WindowFormSave();
             saveFuncList(mDataFileName);
             //saveDataFile();     //  計算式リストの保存
+            Properties.Settings.Default.FuncEditboxFontSize = mFuncEditboxFontSize;
         }
 
         /// <summary>
@@ -446,6 +455,44 @@ namespace CalcApp
         }
 
         /// <summary>
+        /// コメントの編集
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void titleList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            InputBox dlg = new InputBox();
+            dlg.mMainWindow = this;
+            dlg.mMultiLine = true;
+            dlg.mFontSize = mFuncEditboxFontSize;
+            dlg.Title = "コメント";
+            dlg.mEditText = ylib.strControlCodeRev(mComment);
+            if (dlg.ShowDialog() == true) {
+                mComment = ylib.strControlCodeCnv(dlg.mEditText);
+                mFuncEditboxFontSize = dlg.mFontSize;
+            }
+        }
+
+        /// <summary>
+        /// 関数式を別ダイヤログで編集(区切記号';'は改行に置き換え複数行で編集))
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void functionList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            InputBox dlg = new InputBox();
+            dlg.mMainWindow = this;
+            dlg.mMultiLine = true;
+            dlg.mFontSize = mFuncEditboxFontSize;
+            dlg.Title = "関数式";
+            dlg.mEditText = functionList.Text.Replace(";", "\n");
+            if (dlg.ShowDialog() == true) {
+                functionList.Text = ylib.stripControlCode(dlg.mEditText.Replace("\n", ";"));
+                mFuncEditboxFontSize = dlg.mFontSize;
+            }
+        }
+
+        /// <summary>
         /// コンボボックスに計算式を登録する
         /// </summary>
         private void setDataComboBox()
@@ -477,6 +524,7 @@ namespace CalcApp
             data[9] = minZ.Text;
             data[10] = maxZ.Text;
             data[11] = autoHeight.IsChecked.ToString();
+            data[12] = mComment;
 
             int n = mFuncList.FindIndex(p => p[0].CompareTo(data[0]) == 0);
             if (0 <= n){
@@ -519,6 +567,7 @@ namespace CalcApp
                 autoHeight.IsChecked = data[11].CompareTo(true.ToString()) == 0 ? true : false;
                 minZ.IsEnabled = (autoHeight.IsChecked != true);
                 maxZ.IsEnabled = (autoHeight.IsChecked != true);
+                mComment = data[12];        //  コメント
             }
             setFunctionTypeTitle();
         }

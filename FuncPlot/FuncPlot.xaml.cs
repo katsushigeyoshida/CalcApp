@@ -55,13 +55,15 @@ namespace CalcApp
         private string mDataFileName = "FuncPlot.csv";          //  計算式保存ファイル名
         private List<string[]> mFuncList;                       //  計算式リスト
         private string[] mFuncListTitle = {                     //  計算式リストのタイトル
-            "タイトル", "関数式", "Xmin", "Xmax", "分割数", "種別", "Ymin", "Ymax", "高さ自動"
+            "タイトル", "関数式", "Xmin", "Xmax", "分割数", "種別", "Ymin", "Ymax", "高さ自動", "コメント"
         };
         private string[] mFunctionType = {                      //  関数の種類(一般、媒介変数,極方程式)
             "Normal", "Parametric", "Polar"
         };
         private bool mTitleSelectOn = true;
         private bool mFuncSelectOn = true;
+        private int mFuncEditboxFontSize = 12;
+        private string mComment = "";
 
         private YWorldShapes ydraw;                     //  グラフィックライブラリ
         private YLib ylib = new YLib();                 //  単なるライブラリ
@@ -91,6 +93,7 @@ namespace CalcApp
             //  実行ファイルのフォルダを取得しワークフォルダとする
             mAppFolder = AppDomain.CurrentDomain.BaseDirectory;
             mDataFileName = mAppFolder + "\\" + mDataFileName;    //  ファイルパス
+            mFuncEditboxFontSize = Properties.Settings.Default.FuncEditboxFontSize;
 
             //  初期値の設定
             titleList.Text = "SQRT";
@@ -167,6 +170,7 @@ namespace CalcApp
         private void WindowForm_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             saveFuncList(mDataFileName);    //  計算式の保存
+            Properties.Settings.Default.FuncEditboxFontSize = mFuncEditboxFontSize;
             WindowFormSave();
         }
 
@@ -295,6 +299,44 @@ namespace CalcApp
         }
 
         /// <summary>
+        /// コメントの編集
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void titleList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            InputBox dlg = new InputBox();
+            dlg.mMainWindow = this;
+            dlg.mMultiLine = true;
+            dlg.mFontSize = mFuncEditboxFontSize;
+            dlg.Title = "コメント";
+            dlg.mEditText = ylib.strControlCodeRev(mComment);
+            if (dlg.ShowDialog() == true) {
+                mComment = ylib.strControlCodeCnv(dlg.mEditText);
+                mFuncEditboxFontSize =dlg.mFontSize;
+            }
+        }
+
+        /// <summary>
+        /// 関数式を別ダイヤログで編集(区切記号';'は改行に置き換え複数行で編集))
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void functionList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            InputBox dlg = new InputBox();
+            dlg.mMainWindow = this;
+            dlg.mMultiLine = true;
+            dlg.mFontSize = mFuncEditboxFontSize;
+            dlg.Title = "関数式";
+            dlg.mEditText = functionList.Text.Replace(";", "\n");
+            if (dlg.ShowDialog() == true) {
+                functionList.Text = ylib.stripControlCode(dlg.mEditText.Replace("\n", ";"));
+                mFuncEditboxFontSize = dlg.mFontSize;
+            }
+        }
+
+        /// <summary>
         /// 関数リストのデータをコントロールに
         /// </summary>
         /// <param name="n">関数リストの位置</param>
@@ -316,6 +358,7 @@ namespace CalcApp
                 minY.Text = data[6];        //  Y min
                 maxY.Text = data[7];        //  Y max
                 autoHeight.IsChecked = data[8].CompareTo(false.ToString()) == 0 ? false : true;
+                mComment = data[9];
             }
             setFunctionTypeTitle();
             setAutoHeight();
@@ -583,6 +626,7 @@ namespace CalcApp
             data[6] = minY.Text;
             data[7] = maxY.Text;
             data[8] = autoHeight.IsChecked.ToString();
+            data[9] = mComment;
 
             //  タイトルが既に存在していれば削除して登録
             int n = mFuncList.FindIndex(p => p[0].CompareTo(data[0]) == 0);
@@ -860,5 +904,6 @@ namespace CalcApp
         {
             ylib.saveCsvData(path, mFuncListTitle, mFuncList);
         }
+
     }
 }

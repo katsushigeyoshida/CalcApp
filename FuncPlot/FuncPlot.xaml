@@ -12,7 +12,7 @@
                 <TextBlock Text="タイトル" />
             </StatusBarItem>
             <StatusBarItem  >
-                <ComboBox Name="titleList" IsEditable="True" FontSize="14" Width="450" SelectionChanged="TitleList_SelectionChanged"  />
+                <ComboBox Name="titleList" IsEditable="True" FontSize="14" Width="450" SelectionChanged="TitleList_SelectionChanged" MouseDoubleClick="titleList_MouseDoubleClick"  />
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
                 <Button x:Name="executeBtn" Content="実行" Width="40" Click="ExecuteBtn_Click"/>
@@ -23,7 +23,7 @@
                 <TextBlock Text="関数 f(x)" x:Name="functionTitle" />
             </StatusBarItem>
             <StatusBarItem  >
-                <TextBox Name="functionList" FontSize="14" Width="450"  />
+                <TextBox Name="functionList" FontSize="14" Width="450" MouseDoubleClick="functionList_MouseDoubleClick"  />
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
                 <Button x:Name="funcMenuBtn" Content="関数" Width="40" Click="FuncMenuBtn_Click" />
