@@ -9,15 +9,15 @@
     <StackPanel Name="stackPanel">
         <StatusBar >
             <TextBlock Text="タイトル" />
-            <ComboBox Name="calculateName" Margin="0,0,0,0" Width="480" IsEditable="True" SelectionChanged="CalculateName_SelectionChanged" />
+            <ComboBox Name="calculateName" Width="530" IsEditable="True" SelectionChanged="CalculateName_SelectionChanged" />
         </StatusBar>
         <StatusBar >
             <TextBlock Text="説明　" />
-            <TextBox Name="comment" Height="35" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Grid.ColumnSpan="2" Width="480" />
+            <TextBox Name="comment" Height="35" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Center" Grid.ColumnSpan="2" Width="530" />
         </StatusBar>
         <StatusBar >
             <TextBlock Text="計算式" />
-            <TextBox Name="calculateForm" Height="23" Margin="0,0,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Grid.ColumnSpan="2" KeyDown="CalculateForm_KeyDown" Width="480"/>
+            <TextBox Name="calculateForm" Height="23" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Center" Grid.ColumnSpan="2" KeyDown="CalculateForm_KeyDown" Width="530"/>
         </StatusBar>
         <StackPanel Orientation="Horizontal">
             <Label Name="resultTitle" Content="計算結果" Margin="0,5,10,0" VerticalAlignment="Top" Height="30" FontSize="14"/>
