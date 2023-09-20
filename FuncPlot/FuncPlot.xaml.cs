@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using WpfLib;
 
 namespace CalcApp
@@ -268,6 +269,17 @@ namespace CalcApp
         private void FunctionType_Click(object sender, RoutedEventArgs e)
         {
             setFunctionTypeTitle();
+        }
+
+        /// <summary>
+        /// [コピー]ボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CopyButton_Click(object sender, RoutedEventArgs e)
+        {
+            BitmapSource bitmapSource = ylib.canvas2Bitmap(canvas);
+            Clipboard.SetImage(bitmapSource);
         }
 
         /// <summary>
@@ -904,6 +916,5 @@ namespace CalcApp
         {
             ylib.saveCsvData(path, mFuncListTitle, mFuncList);
         }
-
     }
 }
