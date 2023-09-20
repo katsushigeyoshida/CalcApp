@@ -58,6 +58,7 @@
         </StatusBar>
         <StatusBar DockPanel.Dock="Bottom">
             <Button Content="リセット" Click="resetBtn_Click" />
+            <Button Content="コピー" Click="Button_Click" />
             <StatusBarItem HorizontalAlignment="Right">
             </StatusBarItem>
         </StatusBar>

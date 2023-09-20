@@ -3,6 +3,8 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Imaging;
+using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
@@ -363,6 +365,17 @@ namespace CalcApp
         {
             m3Dlib.initPosition(1.5f, -70f, 0f, 10f);
             renderFrame();
+        }
+
+        /// <summary>
+        /// [コピー]ボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Bitmap bmp = ToBitmap();
+            System.Windows.Clipboard.SetImage(ylib.bitmap2BitmapSource(bmp));
         }
 
         /// <summary>
@@ -987,6 +1000,28 @@ namespace CalcApp
         private void saveFuncList(string path)
         {
             ylib.saveCsvData(path, mFuncListTitle, mFuncList);
+        }
+
+        /// <summary>
+        /// glControl画面をBitmapに変換
+        /// https://teratail.com/questions/283747
+        /// </summary>
+        /// <returns>Bitmap</returns>
+        private Bitmap ToBitmap()
+        {
+            int WorldWidth = (int)glGraph.ActualWidth;
+            int WorldHeight = (int)glGraph.ActualHeight;
+
+            glControl.Refresh();
+            Bitmap bmp = new Bitmap(WorldWidth, WorldHeight);
+            var bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            GL.ReadPixels(0, 0, WorldWidth, WorldHeight, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, bmpData.Scan0);
+
+            bmp.UnlockBits(bmpData);
+            bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
+
+            return bmp;
         }
     }
 }
