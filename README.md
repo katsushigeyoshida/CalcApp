@@ -1,7 +1,9 @@
 # CalcApp
 計算式電卓/2次元グラフ/3次元グラフ/オープンデータの表示ソフト
 
-実行方法は[CalcApp.zip](CalcApp.zip)をダウンロードし適当なフォルダーに展開してCalcApp.exeを実行する。
+実行方法は[CalcApp.zip](CalcApp.zip)をダウンロードし適当なフォルダーに展開してCalcApp.exeを実行する。  
+<img src="Image/download.png" width="100%">
+
 
 ## 起動画面
 使用する機能をダブルクリックして起動する。
